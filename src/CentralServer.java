@@ -117,7 +117,7 @@ public CommunicationThread (Socket clientSoc, CentralServer cs)
   {
    clientSocket = clientSoc;
    gui = cs;
-   gui.history.insert ("Comminucating with Port" + clientSocket.getLocalPort()+"\n", 0);
+   gui.history.insert ("Communicating with Port " + clientSocket.getLocalPort()+"\n", 0);
    start();
   }
 
