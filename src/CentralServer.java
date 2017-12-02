@@ -1,4 +1,5 @@
-import java.net.*; 
+import java.net.*;
+import java.util.Vector;
 import java.io.*; 
 import java.awt.*;
 import java.awt.event.*;
@@ -10,18 +11,23 @@ public class CentralServer extends JFrame implements ActionListener{
 	JLabel portInfo;
 	JTextArea history;
 	private boolean running;
+	Vector<PrintWriter> clientOutput;
 	
 	boolean serverContinue;
 	ServerSocket serverSocket;
 	
 	public CentralServer() {
 		super("Central Server");
+		
+		running = false;
+		
 		Container container = getContentPane();
 		container.setLayout(new FlowLayout());
 		
-		running = false;
 		serverButton = new JButton("Start Listening");
 		serverButton.addActionListener(this);
+		clientOutput = new Vector<PrintWriter>(1);
+		
 		container.add(serverButton);
 		String machineAddress = null;
 		try {
@@ -128,6 +134,7 @@ public void run()
    try { 
         PrintWriter out = new PrintWriter(clientSocket.getOutputStream(), 
                                      true); 
+        
         BufferedReader in = new BufferedReader( 
                 new InputStreamReader( clientSocket.getInputStream())); 
 
