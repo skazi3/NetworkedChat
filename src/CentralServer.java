@@ -11,7 +11,7 @@ public class CentralServer extends JFrame implements ActionListener{
 	JLabel portInfo;
 	JTextArea history;
 	private boolean running;
-	Vector<PrintWriter> clientOutput;
+	Vector<PrintWriter> outStreamList;
 	
 	boolean serverContinue;
 	ServerSocket serverSocket;
@@ -26,7 +26,7 @@ public class CentralServer extends JFrame implements ActionListener{
 		
 		serverButton = new JButton("Start Listening");
 		serverButton.addActionListener(this);
-		clientOutput = new Vector<PrintWriter>(1);
+		outStreamList = new Vector<PrintWriter>();
 		
 		container.add(serverButton);
 		String machineAddress = null;
@@ -54,35 +54,40 @@ public class CentralServer extends JFrame implements ActionListener{
 		if(running == false) {
 			new ConnectionThread(this);
 		}
+		else {
+			serverContinue = false;
+			serverButton.setText("Start Listening");
+			portInfo.setText("Not Listening");
+		}
 	}
 
 }
 
 class ConnectionThread extends Thread
 {
-  CentralServer gui;
+  CentralServer centralServer;
   
   public ConnectionThread (CentralServer cs)
   {
-    gui = cs;
+	centralServer = cs;
     start();
   }
   
   public void run()
   {
-    gui.serverContinue = true;
+	  centralServer.serverContinue = true;
     
     try 
     { 
-      gui.serverSocket = new ServerSocket(0); 
-      gui.portInfo.setText("Listening on Port: " + gui.serverSocket.getLocalPort());
+    	  centralServer.serverSocket = new ServerSocket(0); 
+    	  centralServer.portInfo.setText("Listening on Port: " + centralServer.serverSocket.getLocalPort());
       System.out.println ("Connection Socket Created");
       try { 
-        while (gui.serverContinue)
+        while (centralServer.serverContinue)
         {
           System.out.println ("Waiting for Connection");
-          gui.serverButton.setText("Stop Listening");
-          new CommunicationThread (gui.serverSocket.accept(), gui); 
+          centralServer.serverButton.setText("Stop Listening");
+          new CommunicationThread (centralServer.serverSocket.accept(), centralServer, centralServer.outStreamList); 
         }
       } 
       catch (IOException e) 
@@ -99,7 +104,7 @@ class ConnectionThread extends Thread
     finally
     {
       try {
-        gui.serverSocket.close(); 
+    	  	centralServer.serverSocket.close(); 
       }
       catch (IOException e)
       { 
@@ -113,17 +118,19 @@ class ConnectionThread extends Thread
 
 class CommunicationThread extends Thread
 { 
-//private boolean serverContinue = true;
+
 private Socket clientSocket;
-private CentralServer gui;
+private CentralServer centralServer;
+private Vector<PrintWriter> outStreamList;
 
 
 
-public CommunicationThread (Socket clientSoc, CentralServer cs)
+public CommunicationThread (Socket clientSoc, CentralServer cs, Vector<PrintWriter> osl)
   {
    clientSocket = clientSoc;
-   gui = cs;
-   gui.history.insert ("Communicating with Port " + clientSocket.getLocalPort()+"\n", 0);
+   centralServer = cs;
+   centralServer.history.insert ("Communicating with Port " + clientSocket.getLocalPort()+"\n", 0);
+   outStreamList = osl;
    start();
   }
 
@@ -134,6 +141,7 @@ public void run()
    try { 
         PrintWriter out = new PrintWriter(clientSocket.getOutputStream(), 
                                      true); 
+        outStreamList.add(out);
         
         BufferedReader in = new BufferedReader( 
                 new InputStreamReader( clientSocket.getInputStream())); 
@@ -143,16 +151,22 @@ public void run()
         while ((inputLine = in.readLine()) != null) 
             { 
              System.out.println ("Server: " + inputLine); 
-             gui.history.insert (inputLine+"\n", 0);
-             out.println(inputLine); 
-
+             centralServer.history.insert (inputLine+"\n", 0);
+             
+             for (PrintWriter out1: outStreamList)
+             {
+               System.out.println ("Sending Message");
+               out1.println (inputLine);
+             }
+             
              if (inputLine.equals("Bye.")) 
                  break; 
 
              if (inputLine.equals("End Server.")) 
-                 gui.serverContinue = false; 
+            	 	centralServer.serverContinue = false; 
             } 
-
+        
+        outStreamList.remove(out);
         out.close(); 
         in.close(); 
         clientSocket.close(); 
