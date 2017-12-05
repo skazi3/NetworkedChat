@@ -5,6 +5,11 @@ import java.io.*;
 import java.net.*;
 
 import javax.swing.*;
+/*
+ * prime number function reference:
+ * https://stackoverflow.com/questions/1538644/c-determine-if-a-number-is-prime
+ * */
+
 
 public class Client extends JFrame implements ActionListener{
 	private JPanel    clientsInfo;
@@ -14,8 +19,6 @@ public class Client extends JFrame implements ActionListener{
 	private JTextField pField;
 	private JTextField qField;
 	private JTextField name;
-	private Pair publicKey;
-	private Pair privateKey;
 	
 	private int p;
 	private int q;
@@ -30,6 +33,8 @@ public class Client extends JFrame implements ActionListener{
 	Socket clientSocket;
 	PrintWriter out;
 	BufferedReader in;
+	ObjectOutputStream objectOut = null;
+    ObjectInputStream objectIn = null;
 	
 	  
 	JTextArea  chatHistory;
@@ -90,12 +95,13 @@ public class Client extends JFrame implements ActionListener{
 		}
 	}
 	public void manageConnection() {
+		MessageObject add;
 		if(connected == false) {
 			Object[] message = {
 					"Machine Info:", machineInfo,
 					"Port Info:", portInfo,
-					"Private Key:", p,
-					"Public Key:", q,
+					"P:", pField,
+					"Q:", qField,
 					"Name:", name,
 			};
 			int result = JOptionPane.showConfirmDialog(null, message, "Enter Server info", JOptionPane.OK_CANCEL_OPTION);
@@ -106,17 +112,23 @@ public class Client extends JFrame implements ActionListener{
 				q = Integer.parseInt(qField.getText());
 				clientName = name.getText( );
 				n = p*q;
-				publicKey = new Pair(p, n);
-				privateKey = new Pair(q, n);
-				
+
+				RSAEncryption encrypt = new RSAEncryption(p, q, n);
+				add = new MessageObject('A', encrypt.getPublicKey(), name.getText());
 			}
 			
 			try {
 				clientSocket = new Socket(machineName, portNum);
 				out = new PrintWriter(clientSocket.getOutputStream(), true);
 				in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+				objectOut = new ObjectOutputStream(clientSocket.getOutputStream());
+		        objectIn = new ObjectInputStream(clientSocket.getInputStream());
 				sendButton.setEnabled(true);			
 				connected = true;
+				
+				//objectOut.writeObject(add);
+		        objectOut.flush();
+		        
 				new ClientCommunicationThread(in, this);
 
 			}
@@ -197,6 +209,13 @@ public class Client extends JFrame implements ActionListener{
 		
 		
 		return menuBar;
+	}
+	private boolean isPrime(int num) {
+		for (int i=2; i<num; i++) {
+		    if (num % i == 0 && i != num) 
+		    		return false;  
+		}
+		return true;
 	}
 	
 }

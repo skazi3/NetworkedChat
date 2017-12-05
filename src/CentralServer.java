@@ -12,6 +12,8 @@ public class CentralServer extends JFrame implements ActionListener{
 	JTextArea history;
 	private boolean running;
 	Vector<PrintWriter> outStreamList;
+
+
 	
 	boolean serverContinue;
 	ServerSocket serverSocket;
