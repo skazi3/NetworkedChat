@@ -3,6 +3,7 @@
  * https://stackoverflow.com/questions/28575416/finding-out-if-two-numbers-are-relatively-prime
  * */
 import java.math.*;
+import java.util.Random;
 import java.util.Vector;
 
 public class RSAEncryption {
@@ -17,7 +18,7 @@ public class RSAEncryption {
 	private Pair publicKey;
 	private Pair privateKey;
 	
-	private static int blockSize = 4;
+	private static int blockSize = 2;
 	
 	private String message;
 	private char[] charMessage;
@@ -38,7 +39,9 @@ public class RSAEncryption {
 		phi = createPhi();
 		
 		e   = createE();
+		System.out.println("E is: " + e);
 		d   = createD();
+		System.out.println("D is: " + d);
 		
 
 		publicKey  = new Pair(e, n);
@@ -60,11 +63,12 @@ public class RSAEncryption {
 	private long createE() {
 		long i = 2;
 		long count = 0;
-		int rand = (int)(Math.random()* 20+1);
+		Random rand = new Random();
+		int x = rand.nextInt(100) + 100;
 		while (i < n){
 	        if (gcd(i, phi)==1) {
 	            count++;
-	            if(count == rand) {
+	            if(count == x) {
 	            		break;
 	            }
 	            else
@@ -73,18 +77,17 @@ public class RSAEncryption {
 	        else
 	           i++;
 		 }
-		System.out.println("E is: "+ i);
 		 return i;
 	}
-	
 	private long createD() {
 		long k = 2;
 		long dVal;
-
+		
 		while((1 + (k*phi)) % e != 0) {
 			k++;
 		}
 		dVal = (1 + (k*phi)) / e;
+		System.out.println("K is: " + k + ", phi is: " + phi + "\n");
 		//System.out.println("D is : " + dVal);
 		return dVal;
 		
@@ -129,14 +132,10 @@ public class RSAEncryption {
 
 	}
 	private void encryptMessage(char[] block, BigInteger val) {
-		//System.out.println("Block is: ");
-		//System.out.println(block);
 		BigInteger C = new BigInteger("0");
-		C = val.pow((int) e);
-		
+		C = val.pow((int) e);		
 		C = C.mod(new BigInteger(Integer.toString(n)));
-		//System.out.println("C is ");
-		//System.out.println(C);
+
 		encryptValues.addElement(C);
 	
 	}
@@ -145,14 +144,20 @@ public class RSAEncryption {
 	}
 /*==================================DECRYPT MESSAGE======================================*/		
 	private void setDecryptValues() {
-		//System.out.println("In setDecrypt()");
+		System.out.println("In decrypt()");
+		BigInteger M = new BigInteger("0");
 		for(BigInteger C: encryptValues) {
-			BigInteger M = C.pow((int)d);
-			M = M.mod(new BigInteger(Integer.toString(n)));
-			//System.out.println("M is: " + M);
+			System.out.println("In encryptValues");
+			M = C.pow((int)d).mod(new BigInteger(Integer.toString(n)));
 			decryptValues.addElement(M);
 		}
+		printDecryptValues();
 		
+	}
+	private void printDecryptValues() {
+		for(BigInteger M: decryptValues) {
+			System.out.println(M);
+		}
 	}
 	
 /*============================CHECK IF VAL IS COPRIME======================================*/
