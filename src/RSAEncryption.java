@@ -26,6 +26,10 @@ public class RSAEncryption {
 	private Vector<BigInteger> encryptValues;
 	
 	public RSAEncryption(int pVal, int qVal, int nVal) {
+		
+		blockValues = new Vector<BigInteger>();
+		encryptValues = new Vector<BigInteger>();
+		
 		p   = pVal;
 		q   = qVal;
 		n   = nVal;
@@ -37,8 +41,6 @@ public class RSAEncryption {
 		
 		//publicKey  = new Pair(e, n);
 		//privateKey = new Pair(d, n);
-		
-		blockValues = new Vector<BigInteger>();
 	}
 /*============================GET PUBLIC AND PRIVATE KEY========================================*/
 //	public Pair getPublicKey() {
@@ -69,10 +71,11 @@ public class RSAEncryption {
 		long k = 2;
 		long dVal;
 		while((1 + (k*phi)) % e != 0) {
+			System.out.println("K is: " + k);
 			k++;
 		}
 		dVal = (1 + (k*phi)) / e;
-		System.out.println("D is : " + d);
+		System.out.println("D is : " + dVal);
 		return dVal;
 		
 
@@ -84,13 +87,23 @@ public class RSAEncryption {
 		blockMessage();
 	}
 	private char[] explodeMessage() {
+		int addAmount = message.length() % blockSize;
+		if(addAmount != 0) {
+			for(int i = 0; i < blockSize - addAmount; i++) {
+				message = message + "/0";
+			}
+		}
 		return message.toCharArray();
 	}
 	private void blockMessage() {
 		BigInteger val = new BigInteger("0");
 		char[] block = new char[blockSize];
+		if(charMessage.length % blockSize != 0) {
+			
+		}
 		for(int i = 0; i < charMessage.length; i++) {
 			if((i % blockSize == 0) && i != 0) {
+				System.out.println("Val is: " + val);
 				encryptMessage(block, val);
 				blockValues.addElement(val);
 				val = new BigInteger("0");
@@ -104,15 +117,27 @@ public class RSAEncryption {
 				
 			}
 		}
+		encryptMessage(block, val);
 
 	}
 	private void encryptMessage(char[] block, BigInteger val) {
+		System.out.println("Block is: ");
 		System.out.println(block);
 		BigInteger C = new BigInteger("0");
 		C = val.pow((int) e);
+		
+		C = C.mod(new BigInteger(Integer.toString(n)));
+		System.out.println("C is ");
+		System.out.println(C);
+		encryptValues.addElement(C);
 	
 	}
-	
+	private Vector<BigInteger> getEncryptedMessage(){
+		return encryptValues;
+	}
+	private decryptMessage() {
+		
+	}
 	
 /*============================CHECK IF VAL IS COPRIME======================================*/
 	
