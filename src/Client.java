@@ -10,8 +10,6 @@ import javax.swing.*;
  * https://stackoverflow.com/questions/1538644/c-determine-if-a-number-is-prime
  * */
 
-// Saima needs help!!!!
-
 
 public class Client extends JFrame implements ActionListener{
 	
