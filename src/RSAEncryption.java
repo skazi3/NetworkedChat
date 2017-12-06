@@ -10,8 +10,8 @@ public class RSAEncryption {
 	private int q;
 	private int n;
 	
-	private int phi;
-	private int e;
+	private long phi;
+	private long e;
 	private long d;
 	
 	private Pair publicKey;
@@ -23,6 +23,7 @@ public class RSAEncryption {
 	private char[] charMessage;
 	
 	private Vector<BigInteger> blockValues;
+	private Vector<BigInteger> encryptValues;
 	
 	public RSAEncryption(int pVal, int qVal, int nVal) {
 		p   = pVal;
@@ -34,15 +35,15 @@ public class RSAEncryption {
 		d   = createD();
 		
 		
-		publicKey  = new Pair(e, n);
+		//publicKey  = new Pair(e, n);
 		//privateKey = new Pair(d, n);
 		
 		blockValues = new Vector<BigInteger>();
 	}
 /*============================GET PUBLIC AND PRIVATE KEY========================================*/
-	public Pair getPublicKey() {
-		return new Pair(e, n);
-	}
+//	public Pair getPublicKey() {
+//		return new Pair(e, n);
+//	}
 //	public Pair getPrivateKey() {
 //		return new Pair(d, n);
 //	}
@@ -51,9 +52,9 @@ public class RSAEncryption {
 		 return (p-1) * (q-1);
 	}
 /*===============================CREATE D AND E================================================*/
-	private int createE() {
+	private long createE() {
 
-		for(int i = n-1; i > 0; i--) {
+		for(int i = 2; i < n; i++) {
 			if(isCoPrime(i, phi)) {
 				
 				System.out.println("e is:  " + i);
@@ -65,17 +66,14 @@ public class RSAEncryption {
 	}
 	
 	private long createD() {
-		long k = 0;
-		while(true) {
-			long val = (1 + k * phi) % e;
-			if(val == 0) {
-				System.out.println("d is: " + (1 + k * phi) / e);
-				return (1 + k * phi) / e;
-			}
-			else {
-				k++;
-			}
+		long k = 2;
+		long dVal;
+		while((1 + (k*phi)) % e != 0) {
+			k++;
 		}
+		dVal = (1 + (k*phi)) / e;
+		System.out.println("D is : " + d);
+		return dVal;
 		
 
 	}
@@ -86,36 +84,40 @@ public class RSAEncryption {
 		blockMessage();
 	}
 	private char[] explodeMessage() {
-		System.out.println(message);
 		return message.toCharArray();
 	}
 	private void blockMessage() {
 		BigInteger val = new BigInteger("0");
-		
+		char[] block = new char[blockSize];
 		for(int i = 0; i < charMessage.length; i++) {
-			if(i % (blockSize-1) == 0) {
+			if((i % blockSize == 0) && i != 0) {
+				encryptMessage(block, val);
 				blockValues.addElement(val);
 				val = new BigInteger("0");
+				block[i % blockSize] = charMessage[i];
 			}
 			else {
-				
+				block[i % blockSize] = charMessage[i];
 				int powVal = charMessage[i] *(int)Math.pow(128, (i % blockSize));
 				BigInteger charVal = new BigInteger(Integer.toString(powVal));
 				val = val.add(charVal);
-				System.out.println("Val: " + val);
 				
 			}
 		}
-		for(BigInteger b: blockValues) {
-			System.out.println(b);
-		}
+
+	}
+	private void encryptMessage(char[] block, BigInteger val) {
+		System.out.println(block);
+		BigInteger C = new BigInteger("0");
+		C = val.pow((int) e);
+	
 	}
 	
 	
 /*============================CHECK IF VAL IS COPRIME======================================*/
 	
-	private static int gcd(int val1, int val2) {
-	    int t;
+	private static long gcd(long val1, long val2) {
+	    long t;
 	    while(val2 != 0){
 	        t = val1;
 	        val1 = val2;
@@ -123,7 +125,7 @@ public class RSAEncryption {
 	    }
 	    return val1;
 	}
-	private static boolean isCoPrime(int a, int b) {
+	private static boolean isCoPrime(int a, long b) {
 		return (gcd(a, b) == 1);
 	}
 	

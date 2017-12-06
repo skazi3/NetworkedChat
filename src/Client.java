@@ -51,10 +51,10 @@ public class Client extends JFrame implements ActionListener{
 
 		/*GET USER INFO*/
 		name        = new JTextField("sarah");
-		pField      = new JTextField("17383");
-		qField      = new JTextField("16433");
-		portInfo    = new JTextField("52423");
-		machineInfo = new JTextField("10.5.215.224");
+		pField      = new JTextField("18313");
+		qField      = new JTextField("18133");
+		portInfo    = new JTextField("53407");
+		machineInfo = new JTextField("192.168.1.112");
 		
 		/*ADD THE CLIENT LIST ON THE SIDE*/
 		add(new JScrollPane(clientList()), BorderLayout.EAST);
@@ -123,7 +123,7 @@ public class Client extends JFrame implements ActionListener{
 				n = p*q;
 				RSAEncryption encrypt = new RSAEncryption(p, q, n);
 				encrypt.setMessage("Hello world this is program 5");
-				add = new MessageObject('A', encrypt.getPublicKey(), name.getText());
+				//add = new MessageObject('A', encrypt.getPublicKey(), name.getText());
 			}
 			/*ESTABLISH CONNECTION WITH SERVER*/
 			try {
