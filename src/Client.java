@@ -1,3 +1,5 @@
+import sun.plugin2.message.Message;
+
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -53,8 +55,8 @@ public class Client extends JFrame implements ActionListener{
 		name        = new JTextField("sarah");
 		pField      = new JTextField("17383");
 		qField      = new JTextField("16433");
-		portInfo    = new JTextField("52423");
-		machineInfo = new JTextField("10.5.215.224");
+		portInfo    = new JTextField("49581");
+		machineInfo = new JTextField("192.168.56.1");
 		
 		/*ADD THE CLIENT LIST ON THE SIDE*/
 		add(new JScrollPane(clientList()), BorderLayout.EAST);
@@ -68,9 +70,12 @@ public class Client extends JFrame implements ActionListener{
 		sendButton = new JButton("Send Message");
 		sendButton.setEnabled(false);
 		sendButton.addActionListener(this);
+
+		names.add(0,"Zakee Jabbar");
 		
 		add(new JScrollPane(chatHistory),BorderLayout.CENTER);
 		add(messagePanel(), BorderLayout.SOUTH);
+
 		
 		setJMenuBar(createMenuBar());
 			
@@ -102,7 +107,6 @@ public class Client extends JFrame implements ActionListener{
 	}
 	/*=======================SET UP SOCKET/CONNECTION=========================*/
 	public void manageConnection() {
-		MessageObject add;
 		if(connected == false) {
 			Object[] message = {
 					"Machine Info:", machineInfo,
@@ -112,6 +116,8 @@ public class Client extends JFrame implements ActionListener{
 					"Name:", name,
 			};
 			int result = JOptionPane.showConfirmDialog(null, message, "Enter Server info", JOptionPane.OK_CANCEL_OPTION);
+
+
 
 			/*STORE USER INFO INTO VARIABLES*/
 			if(result == JOptionPane.OK_OPTION) {
@@ -123,26 +129,22 @@ public class Client extends JFrame implements ActionListener{
 				n = p*q;
 				RSAEncryption encrypt = new RSAEncryption(p, q, n);
 				encrypt.setMessage("Hello world this is program 5");
-				add = new MessageObject('A', encrypt.getPublicKey(), name.getText());
+                //initMessage = new MessageObject('A', encrypt.getPublicKey(), name.getText());
 			}
 			/*ESTABLISH CONNECTION WITH SERVER*/
 			try {
 				clientSocket = new Socket(machineName, portNum);
 
-				out = new PrintWriter(clientSocket.getOutputStream(), true);
-				in  = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+//				out = new PrintWriter(clientSocket.getOutputStream(), true);
+//				in  = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
 
 				objectOut = new ObjectOutputStream(clientSocket.getOutputStream());
 		        objectIn  = new ObjectInputStream(clientSocket.getInputStream());
 
 				connected = true;
-				sendButton.setEnabled(true);			
-				
-				
-				//objectOut.writeObject(add);
-		        //objectOut.flush();
+				sendButton.setEnabled(true);
 		        
-				new ClientCommunicationThread(in, this);
+				new ClientCommunicationThread(objectIn, this, objectOut);
 
 			}
 			catch(NumberFormatException nfe) {
@@ -178,17 +180,23 @@ public class Client extends JFrame implements ActionListener{
 /*===================================SEND MESSAGE TO SERVER==========================*/
 	public void sendMessage() {
 		try {
-			out.println(message.getText());
-			message.setText("");
-		}
+            MessageObject mes = new MessageObject('M', clientName, message.getText());
+            message.setText("");
+            objectOut.writeObject(mes);
+            objectOut.flush();
+        }
+
 		catch(Exception e) {
 			chatHistory.insert("Error processing message", 0);
+			e.printStackTrace();
 		}
 	}
-	
-	
-	
-	private JPanel clientList() {
+
+    public String getClientName() {
+        return clientName;
+    }
+
+    private JPanel clientList() {
 		clientsInfo = new JPanel();
 		clientsInfo.setLayout(new BorderLayout());
 		
@@ -238,30 +246,63 @@ public class Client extends JFrame implements ActionListener{
 class ClientCommunicationThread extends Thread {
 	private Client client;
 	private BufferedReader in;
+	private ObjectInputStream objectIn;
+	private ObjectOutputStream objectOut;
 	
-	public ClientCommunicationThread(BufferedReader br, Client c) {
-		in = br;
+	public ClientCommunicationThread(ObjectInputStream br, Client c, ObjectOutputStream outR) {
+		objectIn = br;
+		objectOut = outR;
 		client = c;
 		start();
 		
 	}
 	public void run() {
 		System.out.println("New Client Communication Thread");
+        MessageObject initMessage = new MessageObject('A', client.getClientName(), "Added");
 		
 		try {
-			String inputLine;
-			while((inputLine = in.readLine()) != null) {
-				System.out.println("Client: "+ inputLine);
-				client.chatHistory.insert("From Server:" + inputLine + 
-						"\n", 0);
-				if(inputLine.equals("Bye."))
-					break;
+
+            objectOut.writeObject(initMessage);
+            objectOut.flush();
+			MessageObject inputObject;
+
+			while((inputObject = (MessageObject) objectIn.readObject()) != null)
+            {
+                char messageType = inputObject.getType();
+                String name;
+                String message;
+                switch(messageType) {
+                    case 'A':
+                        name = inputObject.getName();
+                        Pair publickey = inputObject.getPublicKey();
+                        client.chatHistory.insert("User added: " + name + "\n", 0);
+                        //client.chatHistory.insert("Val 1: " + publickey.getVal1() + "Val 2: " + publickey.getVal2(), 0);
+                        client.names.add(0, name);
+                        break;
+
+                    case 'D':
+                        name = inputObject.getName();
+                        client.chatHistory.insert("User Deleted: " + name + "\n", 0);
+                        break;
+
+
+                    case 'M':
+                        name = inputObject.getName();
+                        message = inputObject.getMessage();
+                        client.chatHistory.insert("Message from user " + name + ": " + message + "\n", 0);
+                        break;
+
+                }
 			}
 			in.close();
 		}
 		catch(IOException e){
 			System.err.println("Problem with Client Read");
 		}
+		catch(ClassNotFoundException eC)
+        {
+            System.err.println("Class does not exist");
+        }
 	}
 	
 }

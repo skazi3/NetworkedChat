@@ -1,3 +1,5 @@
+import sun.plugin2.message.Message;
+
 import java.net.*;
 import java.util.Vector;
 import java.io.*; 
@@ -11,7 +13,7 @@ public class CentralServer extends JFrame implements ActionListener{
 	JLabel portInfo;
 	JTextArea history;
 	private boolean running;
-	Vector<PrintWriter> outStreamList;
+	Vector<ObjectOutputStream> outStreamList;
 
 
 	
@@ -28,7 +30,7 @@ public class CentralServer extends JFrame implements ActionListener{
 		
 		serverButton = new JButton("Start Listening");
 		serverButton.addActionListener(this);
-		outStreamList = new Vector<PrintWriter>();
+		outStreamList = new Vector<>();
 		
 		container.add(serverButton);
 		String machineAddress = null;
@@ -121,64 +123,100 @@ class ConnectionThread extends Thread
 class CommunicationThread extends Thread
 { 
 
-private Socket clientSocket;
-private CentralServer centralServer;
-private Vector<PrintWriter> outStreamList;
+    private Socket clientSocket;
+    private CentralServer centralServer;
+    private Vector<ObjectOutputStream> outStreamList;
 
 
 
-public CommunicationThread (Socket clientSoc, CentralServer cs, Vector<PrintWriter> osl)
-  {
-   clientSocket = clientSoc;
-   centralServer = cs;
-   centralServer.history.insert ("Communicating with Port " + clientSocket.getLocalPort()+"\n", 0);
-   outStreamList = osl;
-   start();
-  }
+    public CommunicationThread (Socket clientSoc, CentralServer cs, Vector<ObjectOutputStream> osl)
+    {
+        clientSocket = clientSoc;
+        centralServer = cs;
+        centralServer.history.insert("Communicating with Port " + clientSocket.getLocalPort() + "\n", 0);
+        outStreamList = osl;
+        start();
+    }
 
-public void run()
-  {
-   System.out.println ("New Communication Thread Started");
+    public void run()
+    {
+       System.out.println ("New Communication Thread Started");
 
-   try { 
-        PrintWriter out = new PrintWriter(clientSocket.getOutputStream(), 
-                                     true); 
-        outStreamList.add(out);
-        
-        BufferedReader in = new BufferedReader( 
-                new InputStreamReader( clientSocket.getInputStream())); 
+       try
+       {
+            ObjectOutputStream out = new ObjectOutputStream(clientSocket.getOutputStream());
+            outStreamList.add(out);
 
-        String inputLine; 
+            ObjectInputStream in = new ObjectInputStream(clientSocket.getInputStream());
 
-        while ((inputLine = in.readLine()) != null) 
-            { 
-             System.out.println ("Server: " + inputLine); 
-             centralServer.history.insert (inputLine+"\n", 0);
-             
-             for (PrintWriter out1: outStreamList)
-             {
-               System.out.println ("Sending Message");
-               out1.println (inputLine);
-             }
-             
-             if (inputLine.equals("Bye.")) 
-                 break; 
+            MessageObject inputObject;
 
-             if (inputLine.equals("End Server.")) 
-            	 	centralServer.serverContinue = false; 
-            } 
-        
-        outStreamList.remove(out);
-        out.close(); 
-        in.close(); 
-        clientSocket.close(); 
-       } 
-   catch (IOException e) 
-       { 
-        System.err.println("Problem with Communication Server");
-        //System.exit(1); 
-       } 
-   }
+            while ((inputObject = (MessageObject) in.readObject()) != null)
+            {
+                 char messageType = inputObject.getType();
+                 String message;
+                 String name;
+                 switch(messageType)
+                 {
+                     case 'A':
+                         name = inputObject.getName();
+                         //Pair publickey = inputObject.getPublicKey();
+                         centralServer.history.insert("User added: " + name + "\n", 0);
+                         //centralServer.history.insert("Val 1: " + publickey.getVal1() + "Val 2: " + publickey.getVal2(), 0);
+                         for (ObjectOutputStream out1: outStreamList)
+                         {
+                             System.out.println ("Sending Message");
+                             out1.writeObject (inputObject);
+                             out1.flush();
+                         }
+
+                         break;
+
+
+                     case 'D':
+                         for (ObjectOutputStream out1: outStreamList)
+                         {
+                             System.out.println ("Sending Message");
+                             out1.writeObject (inputObject);
+                             out1.flush();
+                         }
+
+                         break;
+
+
+                     case 'M':
+                         System.out.println("Received message!");
+                         message = inputObject.getMessage();
+                         name = inputObject.getName();
+
+                         for (ObjectOutputStream out1: outStreamList)
+                         {
+                             System.out.println ("Sending Message");
+                             centralServer.history.insert("Message from user " + name + ": "  + message + "\n", 0);
+                             out1.writeObject (inputObject);
+                             out1.flush();
+                         }
+
+                         break;
+
+                 }
+            }
+
+            outStreamList.remove(out);
+            out.close();
+            in.close();
+            clientSocket.close();
+       }
+       catch (IOException e)
+       {
+            System.err.println("Problem with Communication Server");
+            //System.exit(1);
+       }
+       catch(ClassNotFoundException cE)
+       {
+           System.err.println("Object class not found!");
+       }
+    }
 } 
 
 
