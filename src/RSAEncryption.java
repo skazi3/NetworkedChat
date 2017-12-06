@@ -117,6 +117,7 @@ public class RSAEncryption {
 				//System.out.println("Val is: " + val);
 				encryptMessage(block, val);
 				blockValues.addElement(val);
+				
 				val = new BigInteger("0");
 				block[i % blockSize] = charMessage[i];
 			}
@@ -132,7 +133,11 @@ public class RSAEncryption {
 
 	}
 	private void encryptMessage(char[] block, BigInteger val) {
+		System.out.println(block);
+		System.out.println("Val is: ");
+		System.out.println(val);
 		BigInteger C = new BigInteger("0");
+		
 		C = val.pow((int) e);		
 		C = C.mod(new BigInteger(Integer.toString(n)));
 
