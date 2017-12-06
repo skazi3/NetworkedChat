@@ -12,6 +12,8 @@ import javax.swing.*;
 
 
 public class Client extends JFrame implements ActionListener{
+	
+/*======================PRIVATE VARIABLES AND SOCKET VARIABLES====================*/	
 	private JPanel    clientsInfo;
 	private JTextField machineInfo;
 	private JTextField portInfo;
@@ -41,17 +43,20 @@ public class Client extends JFrame implements ActionListener{
 	private JTextField message;
 	private JList<String> clientList;
 	DefaultListModel<String> names;
-	
+/*====================================CONSTRUCTOR====================================*/		
 	public Client() {
 		setLayout(new BorderLayout());
 		
 		connected = false;
-		machineInfo = new JTextField("10.107.210.254");
-		portInfo = new JTextField();
-		pField = new JTextField();
-		qField = new JTextField();
-		name = new JTextField();
+
+		/*GET USER INFO*/
+		name        = new JTextField("sarah");
+		pField      = new JTextField("17383");
+		qField      = new JTextField("16433");
+		portInfo    = new JTextField("52423");
+		machineInfo = new JTextField("10.5.215.224");
 		
+		/*ADD THE CLIENT LIST ON THE SIDE*/
 		add(new JScrollPane(clientList()), BorderLayout.EAST);
 		
 		chatHistory = new JTextArea(10, 40);
@@ -68,22 +73,23 @@ public class Client extends JFrame implements ActionListener{
 		add(messagePanel(), BorderLayout.SOUTH);
 		
 		setJMenuBar(createMenuBar());
-		
-		
+			
 		
 		setSize(500, 250);
 		setVisible(true);
 	}
+	/*END CONSTRUCTOR*/
+
 	private JPanel messagePanel() {
 		JPanel messagePanel = new JPanel();
 		messagePanel.setLayout(new BorderLayout());
-
 
 		messagePanel.add(message, BorderLayout.CENTER);
 		messagePanel.add(sendButton, BorderLayout.EAST);
 		
 		return messagePanel;
 	}
+	/*IMPLEMENT ACTIONLISTENER*/
 	public void actionPerformed(ActionEvent e) {
 		if(e.getSource() == sendButton ||
 		   e.getSource() == message) {
@@ -94,6 +100,7 @@ public class Client extends JFrame implements ActionListener{
 			manageConnection();
 		}
 	}
+	/*=======================SET UP SOCKET/CONNECTION=========================*/
 	public void manageConnection() {
 		MessageObject add;
 		if(connected == false) {
@@ -105,6 +112,8 @@ public class Client extends JFrame implements ActionListener{
 					"Name:", name,
 			};
 			int result = JOptionPane.showConfirmDialog(null, message, "Enter Server info", JOptionPane.OK_CANCEL_OPTION);
+
+			/*STORE USER INFO INTO VARIABLES*/
 			if(result == JOptionPane.OK_OPTION) {
 				machineName = machineInfo.getText();
 				portNum = Integer.parseInt(portInfo.getText());
@@ -112,22 +121,26 @@ public class Client extends JFrame implements ActionListener{
 				q = Integer.parseInt(qField.getText());
 				clientName = name.getText( );
 				n = p*q;
-
 				RSAEncryption encrypt = new RSAEncryption(p, q, n);
+				encrypt.setMessage("Hello world this is program 5");
 				add = new MessageObject('A', encrypt.getPublicKey(), name.getText());
 			}
-			
+			/*ESTABLISH CONNECTION WITH SERVER*/
 			try {
 				clientSocket = new Socket(machineName, portNum);
+
 				out = new PrintWriter(clientSocket.getOutputStream(), true);
-				in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+				in  = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+
 				objectOut = new ObjectOutputStream(clientSocket.getOutputStream());
-		        objectIn = new ObjectInputStream(clientSocket.getInputStream());
-				sendButton.setEnabled(true);			
+		        objectIn  = new ObjectInputStream(clientSocket.getInputStream());
+
 				connected = true;
+				sendButton.setEnabled(true);			
+				
 				
 				//objectOut.writeObject(add);
-		        objectOut.flush();
+		        //objectOut.flush();
 		        
 				new ClientCommunicationThread(in, this);
 
@@ -144,6 +157,7 @@ public class Client extends JFrame implements ActionListener{
 			}
 		}
 		else {
+/*============================CLOSE CONNECTION=======================================*/
 			try 
 	        {
 	          out.close();
@@ -161,7 +175,7 @@ public class Client extends JFrame implements ActionListener{
 		
 		
 	}
-
+/*===================================SEND MESSAGE TO SERVER==========================*/
 	public void sendMessage() {
 		try {
 			out.println(message.getText());
@@ -210,6 +224,7 @@ public class Client extends JFrame implements ActionListener{
 		
 		return menuBar;
 	}
+	
 	private boolean isPrime(int num) {
 		for (int i=2; i<num; i++) {
 		    if (num % i == 0 && i != num) 
