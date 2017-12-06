@@ -27,7 +27,7 @@ public class RSAEncryption {
 	private Vector<BigInteger> encryptValues;
 	private Vector<BigInteger> decryptValues;
 	
-	public RSAEncryption(int pVal, int qVal, int nVal) {
+	public RSAEncryption(int pVal, int qVal) {
 		
 		blockValues = new Vector<BigInteger>();
 		encryptValues = new Vector<BigInteger>();
@@ -35,13 +35,12 @@ public class RSAEncryption {
 		
 		p   = pVal;
 		q   = qVal;
-		n   = nVal;
+		n   = p * q;
 		phi = createPhi();
 		
 		e   = createE();
-		System.out.println("E is: " + e);
 		d   = createD();
-		System.out.println("D is: " + d);
+
 		
 
 		publicKey  = new Pair(e, n);
@@ -87,8 +86,6 @@ public class RSAEncryption {
 			k++;
 		}
 		dVal = (1 + (k*phi)) / e;
-		System.out.println("K is: " + k + ", phi is: " + phi + "\n");
-		//System.out.println("D is : " + dVal);
 		return dVal;
 		
 
@@ -114,7 +111,6 @@ public class RSAEncryption {
 		char[] block = new char[blockSize];
 		for(int i = 0; i < charMessage.length; i++) {
 			if((i % blockSize == 0) && i != 0) {
-				//System.out.println("Val is: " + val);
 				encryptMessage(block, val);
 				blockValues.addElement(val);
 				
@@ -133,9 +129,6 @@ public class RSAEncryption {
 
 	}
 	private void encryptMessage(char[] block, BigInteger val) {
-		System.out.println(block);
-		System.out.println("Val is: ");
-		System.out.println(val);
 		BigInteger C = new BigInteger("0");
 		
 		C = val.pow((int) e);		
@@ -149,20 +142,31 @@ public class RSAEncryption {
 	}
 /*==================================DECRYPT MESSAGE======================================*/		
 	private void setDecryptValues() {
-		System.out.println("In decrypt()");
 		BigInteger M = new BigInteger("0");
+		
 		for(BigInteger C: encryptValues) {
-			System.out.println("In encryptValues");
 			M = C.pow((int)d).mod(new BigInteger(Integer.toString(n)));
 			decryptValues.addElement(M);
 		}
+		
 		printDecryptValues();
 		
 	}
+	private void decryptMessage() {
+		char[] block = new char[blockSize];
+		int i = 0;
+		for(BigInteger M: decryptValues) {
+			while(i < blockSize) {
+			}
+			System.out.println(block);
+		}
+	}
+	
 	private void printDecryptValues() {
 		for(BigInteger M: decryptValues) {
 			System.out.println(M);
 		}
+		decryptMessage();
 	}
 	
 /*============================CHECK IF VAL IS COPRIME======================================*/

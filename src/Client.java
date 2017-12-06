@@ -24,7 +24,10 @@ public class Client extends JFrame implements ActionListener{
 	
 	private int p;
 	private int q;
-	private int n;
+	
+	private Pair publicKey;
+	private Pair privateKey;
+	
 	private String clientName;
 	
 	String machineName;
@@ -51,8 +54,8 @@ public class Client extends JFrame implements ActionListener{
 
 		/*GET USER INFO*/
 		name        = new JTextField("sarah");
-		pField      = new JTextField("18313");
-		qField      = new JTextField("18133");
+		pField      = new JTextField("379");
+		qField      = new JTextField("211");
 		portInfo    = new JTextField("55415");
 		machineInfo = new JTextField("10.107.210.76");
 
@@ -70,7 +73,6 @@ public class Client extends JFrame implements ActionListener{
 		sendButton.setEnabled(false);
 		sendButton.addActionListener(this);
 
-		names.add(0,"Zakee Jabbar");
 		
 		add(new JScrollPane(chatHistory),BorderLayout.CENTER);
 		add(messagePanel(), BorderLayout.SOUTH);
@@ -116,8 +118,6 @@ public class Client extends JFrame implements ActionListener{
 			};
 			int result = JOptionPane.showConfirmDialog(null, message, "Enter Server info", JOptionPane.OK_CANCEL_OPTION);
 
-
-
 			/*STORE USER INFO INTO VARIABLES*/
 			if(result == JOptionPane.OK_OPTION) {
 				machineName = machineInfo.getText();
@@ -125,14 +125,22 @@ public class Client extends JFrame implements ActionListener{
 				p = Integer.parseInt(pField.getText());
 				q = Integer.parseInt(qField.getText());
 				clientName = name.getText( );
-				n = p*q;
-				RSAEncryption encrypt = new RSAEncryption(p, q, n);
-				encrypt.setMessage("Hello world this is program 5");
+				
+				RSAEncryption encryptionVal = new RSAEncryption(p, q);
+				encryptionVal.setMessage("Hello world this is program 5");
+				
+				publicKey = encryptionVal.getPublicKey();
+				privateKey = encryptionVal.getPrivateKey();
+				
+				ClientInfo clientInfo = new ClientInfo(publicKey, clientName);
 
                 //initMessage = new MessageObject('A', encrypt.getPublicKey(), name.getText());
 
 				//add = new MessageObject('A', encrypt.getPublicKey(), name.getText());
 
+			}
+			else {
+				result = JOptionPane.showConfirmDialog(null, message, "Enter Server info", JOptionPane.OK_CANCEL_OPTION);
 			}
 			/*ESTABLISH CONNECTION WITH SERVER*/
 			try {
@@ -150,10 +158,10 @@ public class Client extends JFrame implements ActionListener{
 				new ClientCommunicationThread(objectIn, this, objectOut);
 
 			}
-			catch(NumberFormatException nfe) {
-				System.out.println("Server Port must be integer");
-				
+			catch(IllegalArgumentException iae) {
+				System.out.println("Server Port must be integer");	
 			}
+	
 			catch(UnknownHostException uhe) {
 				System.out.println("Don't know host");
 			}
