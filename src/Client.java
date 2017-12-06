@@ -53,8 +53,8 @@ public class Client extends JFrame implements ActionListener{
 		name        = new JTextField("sarah");
 		pField      = new JTextField("18313");
 		qField      = new JTextField("18133");
-		portInfo    = new JTextField("53407");
-		machineInfo = new JTextField("192.168.1.112");
+		portInfo    = new JTextField("55415");
+		machineInfo = new JTextField("10.107.210.76");
 		
 		/*ADD THE CLIENT LIST ON THE SIDE*/
 		add(new JScrollPane(clientList()), BorderLayout.EAST);
