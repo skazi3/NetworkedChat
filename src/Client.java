@@ -1,5 +1,3 @@
-import sun.plugin2.message.Message;
-
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -53,17 +51,11 @@ public class Client extends JFrame implements ActionListener{
 
 		/*GET USER INFO*/
 		name        = new JTextField("sarah");
-<<<<<<< HEAD
-		pField      = new JTextField("17383");
-		qField      = new JTextField("16433");
-		portInfo    = new JTextField("49581");
-		machineInfo = new JTextField("192.168.56.1");
-=======
 		pField      = new JTextField("18313");
 		qField      = new JTextField("18133");
 		portInfo    = new JTextField("55415");
 		machineInfo = new JTextField("10.107.210.76");
->>>>>>> 2f3dd718367b0299143e0a60521a8062bc4c3fcf
+
 		
 		/*ADD THE CLIENT LIST ON THE SIDE*/
 		add(new JScrollPane(clientList()), BorderLayout.EAST);
@@ -136,11 +128,11 @@ public class Client extends JFrame implements ActionListener{
 				n = p*q;
 				RSAEncryption encrypt = new RSAEncryption(p, q, n);
 				encrypt.setMessage("Hello world this is program 5");
-<<<<<<< HEAD
+
                 //initMessage = new MessageObject('A', encrypt.getPublicKey(), name.getText());
-=======
+
 				//add = new MessageObject('A', encrypt.getPublicKey(), name.getText());
->>>>>>> 2f3dd718367b0299143e0a60521a8062bc4c3fcf
+
 			}
 			/*ESTABLISH CONNECTION WITH SERVER*/
 			try {

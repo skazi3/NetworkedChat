@@ -1,5 +1,3 @@
-import sun.plugin2.message.Message;
-
 import java.net.*;
 import java.util.Vector;
 import java.io.*; 
