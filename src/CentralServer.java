@@ -168,11 +168,13 @@ class CommunicationThread extends Thread
                      inputObject.setExistingClients(clientInfo);
                      centralServer.history.insert("User added: " + name + "\n", 0);
                      //centralServer.history.insert("Val 1: " + publickey.getVal1() + "Val 2: " + publickey.getVal2(), 0);
-                     for (ObjectOutputStream out1: outStreamList)
+                     for (ClientInfo c: clientInfo)
                      {
-                         System.out.println ("Sending Message");
-                         out1.writeObject (inputObject);
-                         out1.flush();
+                    	 	if(c.getUsername() != name) {
+	                         System.out.println ("Sending Message"); 
+	                         c.getOut().writeObject (inputObject);
+	                         c.getOut().flush();
+                    	 	}
                      }
 
                          break;

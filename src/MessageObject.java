@@ -40,6 +40,10 @@ public class MessageObject implements Serializable
 		name = n;
 		message = m;
 	}
+	public MessageObject(char t, Vector<ClientInfo> ci) {
+		type = t;
+		existingClients = ci;
+	}
 
 
 	public Vector<ClientInfo> getExistingClients() {

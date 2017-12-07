@@ -7,7 +7,7 @@ public class ClientInfo {
 	
 	public ClientInfo(Pair pk, String name, ObjectOutputStream oos) {
 		publicKey = pk;
-		username = name;
+		username = name; 
 		out = oos;
 	}
 

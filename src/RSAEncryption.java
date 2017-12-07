@@ -149,16 +149,14 @@ public class RSAEncryption {
 			decryptValues.addElement(M);
 		}
 		
-		//printDecryptValues();
+		printDecryptValues();
 		
 	}
 	private void decryptMessage() {
 		char[] block = new char[blockSize];
 		int i = 0;
 		for(BigInteger M: decryptValues) {
-			while(i < blockSize) {
-			}
-			System.out.println(block);
+			
 		}
 	}
 	

@@ -127,7 +127,7 @@ public class Client extends JFrame implements ActionListener{
 				clientName = name.getText( );
 				
 				RSAEncryption encryptionVal = new RSAEncryption(p, q);
-				encryptionVal.setMessage("Hello world this is program 5");
+				encryptionVal.setMessage("aaaa");
 				
 				publicKey = encryptionVal.getPublicKey();
 				privateKey = encryptionVal.getPrivateKey();
@@ -293,7 +293,7 @@ class ClientCommunicationThread extends Thread {
                         client.chatHistory.insert("User added: " + name + "\n", 0);
                         //client.chatHistory.insert("Val 1: " + publickey.getVal1() + "Val 2: " + publickey.getVal2(), 0);
                         for(ClientInfo c: inputObject.getExistingClients()) {
-                        		client.names.add(0, c.getUsername());
+                        		client.names.add(0, c.getUsername()); 
                         }
                         break;
 
