@@ -1,6 +1,7 @@
 import javax.swing.JFrame;
 
-public class ChatClient {
+public class ChatClient
+{
 
 	public static void main(String[] args) {
 		Client client = new Client();
