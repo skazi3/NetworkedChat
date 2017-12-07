@@ -16,9 +16,6 @@ public class CentralServer extends JFrame implements ActionListener{
 	
 	Vector<ObjectOutputStream> outStreamList;
 
-	
-
-	
 	boolean serverContinue;
 	ServerSocket serverSocket;
 	
@@ -191,6 +188,7 @@ class CommunicationThread extends Thread
 
                      case 'D':
                     	 	name = inputObject.getName();
+                    	 	clientInfo.remove(name);
                     	 	for(String key_name: clientInfo.keySet()) {
                     	 		if(key_name != name) {
 	                  			ClientInfo c = clientInfo.get(key_name);
