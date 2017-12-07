@@ -54,10 +54,10 @@ public class Client extends JFrame implements ActionListener{
 
 		/*GET USER INFO*/
 		name        = new JTextField("sarah");
-		pField      = new JTextField("379");
-		qField      = new JTextField("211");
-		portInfo    = new JTextField("61175");
-		machineInfo = new JTextField("10.4.232.88");
+		pField      = new JTextField("16189");
+		qField      = new JTextField("16381");
+		portInfo    = new JTextField("61553");
+		machineInfo = new JTextField("10.18.198.74");
 
 		
 		/*ADD THE CLIENT LIST ON THE SIDE*/
@@ -127,7 +127,7 @@ public class Client extends JFrame implements ActionListener{
 				clientName = name.getText( );
 				
 				RSAEncryption encryptionVal = new RSAEncryption(p, q);
-				encryptionVal.setMessage("hello world");
+				encryptionVal.setMessage("aaaa aaa aaa");
 				
 				publicKey = encryptionVal.getPublicKey();
 				privateKey = encryptionVal.getPrivateKey();
