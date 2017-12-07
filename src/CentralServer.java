@@ -11,8 +11,10 @@ public class CentralServer extends JFrame implements ActionListener{
 	JLabel portInfo;
 	JTextArea history;
 	private boolean running;
+	
 	Vector<ObjectOutputStream> outStreamList;
-
+	Vector<ClientInfo> clientInfo;
+	
 
 	
 	boolean serverContinue;
@@ -29,6 +31,7 @@ public class CentralServer extends JFrame implements ActionListener{
 		serverButton = new JButton("Start Listening");
 		serverButton.addActionListener(this);
 		outStreamList = new Vector<>();
+		clientInfo = new Vector<ClientInfo>();
 		
 		container.add(serverButton);
 		String machineAddress = null;
@@ -89,7 +92,7 @@ class ConnectionThread extends Thread
         {
           System.out.println ("Waiting for Connection");
           centralServer.serverButton.setText("Stop Listening");
-          new CommunicationThread (centralServer.serverSocket.accept(), centralServer, centralServer.outStreamList); 
+          new CommunicationThread (centralServer.serverSocket.accept(), centralServer, centralServer.outStreamList, centralServer.clientInfo); 
         }
       } 
       catch (IOException e) 
@@ -124,15 +127,17 @@ class CommunicationThread extends Thread
     private Socket clientSocket;
     private CentralServer centralServer;
     private Vector<ObjectOutputStream> outStreamList;
+    private Vector<ClientInfo> clientInfo;
 
 
 
-    public CommunicationThread (Socket clientSoc, CentralServer cs, Vector<ObjectOutputStream> osl)
+    public CommunicationThread (Socket clientSoc, CentralServer cs, Vector<ObjectOutputStream> osl, Vector<ClientInfo> info)
     {
         clientSocket = clientSoc;
         centralServer = cs;
         centralServer.history.insert("Communicating with Port " + clientSocket.getLocalPort() + "\n", 0);
         outStreamList = osl;
+        clientInfo = info;
         start();
     }
 
@@ -156,17 +161,19 @@ class CommunicationThread extends Thread
                  String name;
                  switch(messageType)
                  {
-                     case 'A':
-                         name = inputObject.getName();
-                         //Pair publickey = inputObject.getPublicKey();
-                         centralServer.history.insert("User added: " + name + "\n", 0);
-                         //centralServer.history.insert("Val 1: " + publickey.getVal1() + "Val 2: " + publickey.getVal2(), 0);
-                         for (ObjectOutputStream out1: outStreamList)
-                         {
-                             System.out.println ("Sending Message");
-                             out1.writeObject (inputObject);
-                             out1.flush();
-                         }
+                 case 'A':
+                     name = inputObject.getName();
+                     Pair publicKey = inputObject.getPublicKey();
+                     clientInfo.addElement(new ClientInfo(publicKey, name, out));
+                     inputObject.setExistingClients(clientInfo);
+                     centralServer.history.insert("User added: " + name + "\n", 0);
+                     //centralServer.history.insert("Val 1: " + publickey.getVal1() + "Val 2: " + publickey.getVal2(), 0);
+                     for (ObjectOutputStream out1: outStreamList)
+                     {
+                         System.out.println ("Sending Message");
+                         out1.writeObject (inputObject);
+                         out1.flush();
+                     }
 
                          break;
 

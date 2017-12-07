@@ -1,11 +1,22 @@
+import java.io.ObjectOutputStream;
 
 public class ClientInfo {
 	private Pair publicKey;
 	private String username;
+	private ObjectOutputStream out;
 	
-	public ClientInfo(Pair pk, String name) {
+	public ClientInfo(Pair pk, String name, ObjectOutputStream oos) {
 		publicKey = pk;
 		username = name;
+		out = oos;
+	}
+
+	public ObjectOutputStream getOut() {
+		return out;
+	}
+
+	public void setOut(ObjectOutputStream out) {
+		this.out = out;
 	}
 
 	public Pair getPublicKey() {

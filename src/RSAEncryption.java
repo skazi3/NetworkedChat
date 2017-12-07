@@ -145,11 +145,11 @@ public class RSAEncryption {
 		BigInteger M = new BigInteger("0");
 		
 		for(BigInteger C: encryptValues) {
-			M = C.pow((int)d).mod(new BigInteger(Integer.toString(n)));
+			M = C.modPow(new BigInteger(Long.toString(d)), new BigInteger(Integer.toString(n)));
 			decryptValues.addElement(M);
 		}
 		
-		printDecryptValues();
+		//printDecryptValues();
 		
 	}
 	private void decryptMessage() {

@@ -56,8 +56,8 @@ public class Client extends JFrame implements ActionListener{
 		name        = new JTextField("sarah");
 		pField      = new JTextField("379");
 		qField      = new JTextField("211");
-		portInfo    = new JTextField("55415");
-		machineInfo = new JTextField("10.107.210.76");
+		portInfo    = new JTextField("57208");
+		machineInfo = new JTextField("10.5.214.143");
 
 		
 		/*ADD THE CLIENT LIST ON THE SIDE*/
@@ -132,7 +132,6 @@ public class Client extends JFrame implements ActionListener{
 				publicKey = encryptionVal.getPublicKey();
 				privateKey = encryptionVal.getPrivateKey();
 				
-				ClientInfo clientInfo = new ClientInfo(publicKey, clientName);
 
                 //initMessage = new MessageObject('A', encrypt.getPublicKey(), name.getText());
 
@@ -230,11 +229,16 @@ public class Client extends JFrame implements ActionListener{
 		JMenu about   = new JMenu("About");
 		JMenu help    = new JMenu("Help");
 		JMenu connect = new JMenu("Connect");
+		JMenu quit    = new JMenu("Quit");
 		
 		JMenuItem startConnection = new JMenuItem("Start Connection");
+		JMenuItem quitChat = new JMenuItem("Quit");
+		
 		startConnection.addActionListener(this);
+	
 		
 		connect.add(startConnection);
+		quit.add(quitChat);
 		
 		menuBar.add(about);
 		menuBar.add(help);
@@ -288,7 +292,9 @@ class ClientCommunicationThread extends Thread {
                         Pair publickey = inputObject.getPublicKey();
                         client.chatHistory.insert("User added: " + name + "\n", 0);
                         //client.chatHistory.insert("Val 1: " + publickey.getVal1() + "Val 2: " + publickey.getVal2(), 0);
-                        client.names.add(0, name);
+                        for(ClientInfo c: inputObject.getExistingClients()) {
+                        		client.names.add(0, c.getUsername());
+                        }
                         break;
 
                     case 'D':

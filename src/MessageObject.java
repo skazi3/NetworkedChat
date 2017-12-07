@@ -1,5 +1,8 @@
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Vector;
+
+import javax.swing.DefaultListModel;
 
 public class MessageObject implements Serializable
 {
@@ -7,7 +10,8 @@ public class MessageObject implements Serializable
 	private Pair publicKey;
 	private String message;
 	private String name;
-	private ArrayList<Integer> keys;
+	private ArrayList<Pair> keys;
+	private Vector<ClientInfo> existingClients;
 	
 	/*to add a new user*/
 	public MessageObject(char t, Pair pk, String n) {
@@ -21,7 +25,7 @@ public class MessageObject implements Serializable
 		publicKey = pk;
 	}
 	//send a message
-	public MessageObject(char t, Pair pk, String n, ArrayList<Integer>k, String m)
+	public MessageObject(char t, Pair pk, String n, ArrayList<Pair> k, String m)
 	{
 		type = t;
 		publicKey = pk;
@@ -38,6 +42,12 @@ public class MessageObject implements Serializable
 	}
 
 
+	public Vector<ClientInfo> getExistingClients() {
+		return existingClients;
+	}
+	public void setExistingClients(Vector<ClientInfo> existingClients) {
+		this.existingClients = existingClients;
+	}
 	public char getType()
 	{
 		return type;
@@ -71,11 +81,11 @@ public class MessageObject implements Serializable
 		this.name = name;
 	}
 
-	public ArrayList<Integer> getKeys() {
+	public ArrayList<Pair> getKeys() {
 		return keys;
 	}
 
-	public void setKeys(ArrayList<Integer> keys) {
+	public void setKeys(ArrayList<Pair> keys) {
 		this.keys = keys;
 	}
 }
