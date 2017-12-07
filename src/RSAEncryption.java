@@ -118,7 +118,6 @@ public class RSAEncryption {
 				val = val.add(new BigInteger(Long.toString(powVal)));
 				
 			} 
-			System.out.println(val);
 			encryptMessage(val);
 		}
 	
@@ -148,9 +147,9 @@ public class RSAEncryption {
 		//printDecryptValues();
 		
 	}
-	private void decryptMessage() {
+	private String decryptMessage() {
 		String msg = new String();
-		char[] block = new char[blockSize];
+
 		for(BigInteger M: decryptValues) {
 			while(true) {
 				if(M.intValue() == 0) 
@@ -166,7 +165,7 @@ public class RSAEncryption {
 				
 			}
 		}
-		System.out.println(msg);
+		return msg;
 		
 	}
 	
@@ -175,7 +174,6 @@ public class RSAEncryption {
 		for(BigInteger M: decryptValues) {
 			System.out.println(M);
 		}
-		//decryptMessage();
 	}
 	
 /*============================CHECK IF VAL IS COPRIME======================================*/

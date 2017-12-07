@@ -3,6 +3,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.*;
 import java.net.*;
+import java.util.HashMap;
 
 import javax.swing.*;
 /*
@@ -45,6 +46,8 @@ public class Client extends JFrame implements ActionListener{
 	JTextArea  chatHistory;
 	private JTextField message;
 	private JList<String> clientList;
+	HashMap<String, Pair> nameAndKey;
+	
 	DefaultListModel<String> names;
 /*====================================CONSTRUCTOR====================================*/		
 	public Client() {
@@ -56,9 +59,9 @@ public class Client extends JFrame implements ActionListener{
 		name        = new JTextField("sarah");
 		pField      = new JTextField("16189");
 		qField      = new JTextField("16381");
-		portInfo    = new JTextField("61553");
-		machineInfo = new JTextField("10.18.198.74");
-
+		portInfo    = new JTextField("62197");
+		machineInfo = new JTextField("10.5.219.126");
+ 
 		
 		/*ADD THE CLIENT LIST ON THE SIDE*/
 		add(new JScrollPane(clientList()), BorderLayout.EAST);
@@ -72,6 +75,8 @@ public class Client extends JFrame implements ActionListener{
 		sendButton = new JButton("Send Message");
 		sendButton.setEnabled(false);
 		sendButton.addActionListener(this);
+		
+		nameAndKey = new HashMap<String, Pair>();
 
 		
 		add(new JScrollPane(chatHistory),BorderLayout.CENTER);
@@ -145,9 +150,6 @@ public class Client extends JFrame implements ActionListener{
 			try {
 				clientSocket = new Socket(machineName, portNum);
 
-//				out = new PrintWriter(clientSocket.getOutputStream(), true);
-//				in  = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
-
 				objectOut = new ObjectOutputStream(clientSocket.getOutputStream());
 		        objectIn  = new ObjectInputStream(clientSocket.getInputStream());
 
@@ -160,7 +162,7 @@ public class Client extends JFrame implements ActionListener{
 			catch(IllegalArgumentException iae) {
 				System.out.println("Server Port must be integer");	
 			}
-	
+	       
 			catch(UnknownHostException uhe) {
 				System.out.println("Don't know host");
 			}
@@ -190,9 +192,10 @@ public class Client extends JFrame implements ActionListener{
 /*===================================SEND MESSAGE TO SERVER==========================*/
 	public void sendMessage() {
 		try {
-            MessageObject mes = new MessageObject('M', clientName, message.getText());
+            MessageObject msg = new MessageObject('M', clientName, message.getText());
+            chatHistory.insert("Me: "+ message.getText() + "\n", 0);
             message.setText("");
-            objectOut.writeObject(mes);
+            objectOut.writeObject(msg);
             objectOut.flush();
         }
 
@@ -235,14 +238,32 @@ public class Client extends JFrame implements ActionListener{
 		JMenuItem quitChat = new JMenuItem("Quit");
 		
 		startConnection.addActionListener(this);
+		quitChat.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				if(connected) {
+		            try {
+		            		MessageObject delete = new MessageObject('D', clientName);
+		            		objectOut.writeObject(delete);
+						objectOut.flush();
+					} catch (IOException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
+				}
+				dispose();
+				
+			}
+		});
 	
 		
 		connect.add(startConnection);
 		quit.add(quitChat);
 		
+		
 		menuBar.add(about);
 		menuBar.add(help);
 		menuBar.add(connect);
+		menuBar.add(quit);
 		
 		
 		return menuBar;
@@ -291,15 +312,14 @@ class ClientCommunicationThread extends Thread {
                         name = inputObject.getName();
                         Pair publickey = inputObject.getPublicKey();
                         client.chatHistory.insert("User added: " + name + "\n", 0);
-                        //client.chatHistory.insert("Val 1: " + publickey.getVal1() + "Val 2: " + publickey.getVal2(), 0);
-//                        for(ClientInfo c: inputObject.getExistingClients()) {
-//                        		client.names.add(0, c.getUsername()); 
-//                        }
+                        client.names.addElement(name);
+
                         break;
 
                     case 'D':
                         name = inputObject.getName();
                         client.chatHistory.insert("User Deleted: " + name + "\n", 0);
+                        client.names.removeElement(name);
                         break;
 
 
@@ -308,6 +328,12 @@ class ClientCommunicationThread extends Thread {
                         message = inputObject.getMessage();
                         client.chatHistory.insert("Message from user " + name + ": " + message + "\n", 0);
                         break;
+                        
+                    case 'U':
+                    		name = inputObject.getName();
+                    		client.names.addElement(name);
+                    		break;
+                    		
 
                 }
 			}

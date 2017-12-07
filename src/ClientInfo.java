@@ -9,7 +9,7 @@ public class ClientInfo implements Serializable{
 	public ClientInfo(Pair pk, String name, ObjectOutputStream oos) {
 		publicKey = pk;
 		username = name; 
-		out = oos;
+		out = oos; 
 	}
 
 	public ObjectOutputStream getOut() {

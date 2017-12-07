@@ -159,17 +159,23 @@ class CommunicationThread extends Thread
             while ((inputObject = (MessageObject) in.readObject()) != null)
             {
                  char messageType = inputObject.getType();
-                 String message;
                  String name;
                  switch(messageType)
                  {
                  case 'A':
+	                	 for(String key_name: clientInfo.keySet()) {
+             			ClientInfo c = clientInfo.get(key_name);
+             			MessageObject update = new MessageObject('U', key_name);
+             			out.writeObject(update);
+             			out.flush();
+	             	 }
                      name = inputObject.getName();
+                     
                      Pair publicKey = inputObject.getPublicKey();
                      clientInfo.put(name, new ClientInfo(publicKey, name, out));
                      
                      centralServer.history.insert("User added: " + name + "\n", 0);
-                     //centralServer.history.insert("Val 1: " + publickey.getVal1() + "Val 2: " + publickey.getVal2(), 0);
+  
                      for (String key_name: clientInfo.keySet())
                      {
                     	 	if(key_name != name) {
@@ -184,32 +190,37 @@ class CommunicationThread extends Thread
 
 
                      case 'D':
-                         for (ObjectOutputStream out1: outStreamList)
-                         {
-                             System.out.println ("Sending Message");
-                             out1.writeObject (inputObject);
-                             out1.flush();
-                         }
+                    	 	name = inputObject.getName();
+                    	 	for(String key_name: clientInfo.keySet()) {
+                    	 		if(key_name != name) {
+	                  			ClientInfo c = clientInfo.get(key_name);
+	                  			MessageObject update = new MessageObject('D', name);
+	                  			c.getOut().writeObject(update);
+	                  			c.getOut().flush();
+                    	 		}
+     	             	 }
+                         
 
                          break;
 
 
                      case 'M':
                          System.out.println("Received message!");
-                         message = inputObject.getMessage();
+                         String message = inputObject.getMessage();
                          name = inputObject.getName();
 
                          for (String key_name : clientInfo.keySet())
                          {
                         	 	ClientInfo c = clientInfo.get(key_name);
-                             System.out.println ("Sending Message");
-                            // centralServer.history.insert("Message from user " + name + ": "  + message + "\n", 0);
-                             c.getOut().writeObject (inputObject);
-                             c.getOut().flush();
+                        	 	if(key_name != name) {
+	                             System.out.println ("Sending Message");
+	                           
+	                             c.getOut().writeObject (inputObject);
+	                             c.getOut().flush(); 
+                        	 	}
                          }
 
                          break;
-
                  }
             }
 

@@ -11,7 +11,7 @@ public class MessageObject implements Serializable
 	private String message;
 	private String name;
 	private ArrayList<Pair> keys;
-	private Vector<ClientInfo> existingClients;
+	
 	
 	/*to add a new user*/
 	public MessageObject(char t, Pair pk, String n) {
@@ -19,7 +19,7 @@ public class MessageObject implements Serializable
 		publicKey = pk;
 		this.name = n;
 	}
-	//remove
+	//remove 
 	public MessageObject(char t, Pair pk) {
 		type = t;
 		publicKey = pk;
@@ -33,25 +33,17 @@ public class MessageObject implements Serializable
 		keys = k;
 		message = m;
 	}
-
 	public MessageObject(char t, String n , String m)
 	{
 		type = t;
 		name = n;
 		message = m;
 	}
-	public MessageObject(char t, Vector<ClientInfo> ci) {
+	public MessageObject(char t, String n) {
 		type = t;
-		existingClients = ci;
+		name = n;
 	}
 
-
-	public Vector<ClientInfo> getExistingClients() {
-		return existingClients;
-	}
-	public void setExistingClients(Vector<ClientInfo> existingClients) {
-		this.existingClients = existingClients;
-	}
 	public char getType()
 	{
 		return type;
@@ -74,7 +66,7 @@ public class MessageObject implements Serializable
 	}
 
 	public void setMessage(String message) {
-		this.message = message;
+		this.message = message; 
 	}
 
 	public String getName() {
