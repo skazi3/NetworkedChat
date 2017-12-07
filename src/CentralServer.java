@@ -196,12 +196,13 @@ class CommunicationThread extends Thread
                          message = inputObject.getMessage();
                          name = inputObject.getName();
 
-                         for (ObjectOutputStream out1: outStreamList)
+                         for (ClientInfo c: clientInfo)
                          {
+                        	 
                              System.out.println ("Sending Message");
-                             centralServer.history.insert("Message from user " + name + ": "  + message + "\n", 0);
-                             out1.writeObject (inputObject);
-                             out1.flush();
+                            // centralServer.history.insert("Message from user " + name + ": "  + message + "\n", 0);
+                             c.getOut().writeObject (inputObject);
+                             c.getOut().flush();
                          }
 
                          break;
