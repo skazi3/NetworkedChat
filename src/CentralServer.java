@@ -1,4 +1,5 @@
 import java.net.*;
+import java.util.HashMap;
 import java.util.Vector;
 import java.io.*; 
 import java.awt.*;
@@ -11,9 +12,10 @@ public class CentralServer extends JFrame implements ActionListener{
 	JLabel portInfo;
 	JTextArea history;
 	private boolean running;
+	HashMap<String, ClientInfo> clientInfo;
 	
 	Vector<ObjectOutputStream> outStreamList;
-	Vector<ClientInfo> clientInfo;
+
 	
 
 	
@@ -31,7 +33,7 @@ public class CentralServer extends JFrame implements ActionListener{
 		serverButton = new JButton("Start Listening");
 		serverButton.addActionListener(this);
 		outStreamList = new Vector<>();
-		clientInfo = new Vector<ClientInfo>();
+		clientInfo = new HashMap<String, ClientInfo>();
 		
 		container.add(serverButton);
 		String machineAddress = null;
@@ -127,11 +129,11 @@ class CommunicationThread extends Thread
     private Socket clientSocket;
     private CentralServer centralServer;
     private Vector<ObjectOutputStream> outStreamList;
-    private Vector<ClientInfo> clientInfo;
+    private HashMap<String, ClientInfo> clientInfo;
 
 
 
-    public CommunicationThread (Socket clientSoc, CentralServer cs, Vector<ObjectOutputStream> osl, Vector<ClientInfo> info)
+    public CommunicationThread (Socket clientSoc, CentralServer cs, Vector<ObjectOutputStream> osl, HashMap<String, ClientInfo> info)
     {
         clientSocket = clientSoc;
         centralServer = cs;
@@ -164,13 +166,14 @@ class CommunicationThread extends Thread
                  case 'A':
                      name = inputObject.getName();
                      Pair publicKey = inputObject.getPublicKey();
-                     clientInfo.addElement(new ClientInfo(publicKey, name, out));
-                     inputObject.setExistingClients(clientInfo);
+                     clientInfo.put(name, new ClientInfo(publicKey, name, out));
+                     
                      centralServer.history.insert("User added: " + name + "\n", 0);
                      //centralServer.history.insert("Val 1: " + publickey.getVal1() + "Val 2: " + publickey.getVal2(), 0);
-                     for (ClientInfo c: clientInfo)
+                     for (String key_name: clientInfo.keySet())
                      {
-                    	 	if(c.getUsername() != name) {
+                    	 	if(key_name != name) {
+                    	 		ClientInfo c = clientInfo.get(key_name);
 	                         System.out.println ("Sending Message"); 
 	                         c.getOut().writeObject (inputObject);
 	                         c.getOut().flush();
@@ -196,9 +199,9 @@ class CommunicationThread extends Thread
                          message = inputObject.getMessage();
                          name = inputObject.getName();
 
-                         for (ClientInfo c: clientInfo)
+                         for (String key_name : clientInfo.keySet())
                          {
-                        	 
+                        	 	ClientInfo c = clientInfo.get(key_name);
                              System.out.println ("Sending Message");
                             // centralServer.history.insert("Message from user " + name + ": "  + message + "\n", 0);
                              c.getOut().writeObject (inputObject);
@@ -218,7 +221,7 @@ class CommunicationThread extends Thread
        catch (IOException e)
        {
             System.err.println("Problem with Communication Server");
-            //System.exit(1);
+            e.printStackTrace();
        }
        catch(ClassNotFoundException cE)
        {

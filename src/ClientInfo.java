@@ -1,6 +1,7 @@
 import java.io.ObjectOutputStream;
+import java.io.Serializable;
 
-public class ClientInfo {
+public class ClientInfo implements Serializable{
 	private Pair publicKey;
 	private String username;
 	private ObjectOutputStream out;

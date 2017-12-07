@@ -56,8 +56,8 @@ public class Client extends JFrame implements ActionListener{
 		name        = new JTextField("sarah");
 		pField      = new JTextField("379");
 		qField      = new JTextField("211");
-		portInfo    = new JTextField("57208");
-		machineInfo = new JTextField("10.5.214.143");
+		portInfo    = new JTextField("61175");
+		machineInfo = new JTextField("10.4.232.88");
 
 		
 		/*ADD THE CLIENT LIST ON THE SIDE*/
@@ -127,7 +127,7 @@ public class Client extends JFrame implements ActionListener{
 				clientName = name.getText( );
 				
 				RSAEncryption encryptionVal = new RSAEncryption(p, q);
-				encryptionVal.setMessage("aaaa");
+				encryptionVal.setMessage("hello world");
 				
 				publicKey = encryptionVal.getPublicKey();
 				privateKey = encryptionVal.getPrivateKey();
@@ -292,9 +292,9 @@ class ClientCommunicationThread extends Thread {
                         Pair publickey = inputObject.getPublicKey();
                         client.chatHistory.insert("User added: " + name + "\n", 0);
                         //client.chatHistory.insert("Val 1: " + publickey.getVal1() + "Val 2: " + publickey.getVal2(), 0);
-                        for(ClientInfo c: inputObject.getExistingClients()) {
-                        		client.names.add(0, c.getUsername()); 
-                        }
+//                        for(ClientInfo c: inputObject.getExistingClients()) {
+//                        		client.names.add(0, c.getUsername()); 
+//                        }
                         break;
 
                     case 'D':

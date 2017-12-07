@@ -19,6 +19,7 @@ public class RSAEncryption {
 	private Pair privateKey;
 	
 	private static int blockSize = 2;
+	private BigInteger num = new BigInteger("128");
 	
 	private String message;
 	private char[] charMessage;
@@ -107,30 +108,23 @@ public class RSAEncryption {
 		return message.toCharArray();
 	}
 	private void blockMessage() {
-		BigInteger val = new BigInteger("0");
+
 		char[] block = new char[blockSize];
-		for(int i = 0; i < charMessage.length; i++) {
-			if((i % blockSize == 0) && i != 0) {
-				encryptMessage(block, val);
-				blockValues.addElement(val);
+		for(int i = 0; i < charMessage.length; i+=blockSize) {
+			BigInteger val = new BigInteger("0");
+			for(int j = i; j < i + blockSize; j++) {
 				
-				val = new BigInteger("0");
-				block[i % blockSize] = charMessage[i];
-			}
-			else {
-				block[i % blockSize] = charMessage[i];
-				int powVal = charMessage[i] *(int)Math.pow(128, (i % blockSize));
-				BigInteger charVal = new BigInteger(Integer.toString(powVal));
-				val = val.add(charVal);
+				int powVal = charMessage[j] *(int)Math.pow(128, (j % blockSize));
+				val = val.add(new BigInteger(Integer.toString(powVal)));
 				
-			}
+			} 
+			encryptMessage(val);
 		}
-		encryptMessage(block, val);
+	
 
 	}
-	private void encryptMessage(char[] block, BigInteger val) {
+	private void encryptMessage(BigInteger val) {
 		BigInteger C = new BigInteger("0");
-		
 		C = val.pow((int) e);		
 		C = C.mod(new BigInteger(Integer.toString(n)));
 
@@ -148,16 +142,27 @@ public class RSAEncryption {
 			M = C.modPow(new BigInteger(Long.toString(d)), new BigInteger(Integer.toString(n)));
 			decryptValues.addElement(M);
 		}
-		
-		printDecryptValues();
+		decryptMessage();
 		
 	}
 	private void decryptMessage() {
+		String msg = new String();
 		char[] block = new char[blockSize];
-		int i = 0;
+		int i;
 		for(BigInteger M: decryptValues) {
+			BigInteger C = M;
+			int b = M.shiftRight(7).intValue();
 			
+			BigInteger bVal =new BigInteger(Integer.toString(b));
+			int a = M.subtract(num.multiply(bVal)).intValue();
+			char firstLetter = (char)a;
+			char secondLetter = (char)b;
+			msg += firstLetter;
+			if(b != 48)
+				msg += secondLetter;
+
 		}
+		System.out.println(msg);
 	}
 	
 	private void printDecryptValues() {
