@@ -1,4 +1,5 @@
 import java.io.Serializable;
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Vector;
 
@@ -10,7 +11,7 @@ public class MessageObject implements Serializable
 	private Pair publicKey;
 	private String message;
 	private String name;
-	private ArrayList<Pair> keys;
+	private Vector<BigInteger> encryptedValues;
 	
 	
 	/*to add a new user*/
@@ -24,14 +25,16 @@ public class MessageObject implements Serializable
 		type = t;
 		publicKey = pk;
 	}
-	//send a message
-	public MessageObject(char t, Pair pk, String n, ArrayList<Pair> k, String m)
-	{
+
+	/*send encrypted values*/
+	public MessageObject(char t, String name, Vector<BigInteger> val) {
 		type = t;
-		publicKey = pk;
-		name = n;
-		keys = k;
-		message = m;
+		this.name = name;
+		encryptedValues = val;
+	}
+	
+	public Vector<BigInteger> getEncryptedValues() {
+		return encryptedValues;
 	}
 	public MessageObject(char t, String n , String m)
 	{
@@ -77,11 +80,5 @@ public class MessageObject implements Serializable
 		this.name = name;
 	}
 
-	public ArrayList<Pair> getKeys() {
-		return keys;
-	}
 
-	public void setKeys(ArrayList<Pair> keys) {
-		this.keys = keys;
-	}
 }

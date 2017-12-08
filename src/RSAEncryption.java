@@ -95,8 +95,12 @@ public class RSAEncryption {
 	public void setMessage(String m) {
 		message = m;
 		charMessage = explodeMessage();
-		blockMessage();
-		setDecryptValues();
+	}
+	public Vector<BigInteger> getEncryptValues(long e, long n) {
+		blockMessage(e, n);
+		return encryptValues;
+		
+		
 	}
 	private char[] explodeMessage() {
 		int addAmount = message.length() % blockSize;
@@ -107,7 +111,7 @@ public class RSAEncryption {
 		}
 		return message.toCharArray();
 	}
-	private void blockMessage() {
+	private void blockMessage(long e, long n) {
 
 		char[] block = new char[blockSize];
 		for(int i = 0; i < charMessage.length; i+=blockSize) {
@@ -118,21 +122,21 @@ public class RSAEncryption {
 				val = val.add(new BigInteger(Long.toString(powVal)));
 				
 			} 
-			encryptMessage(val);
+			encryptMessage(val, e, n);
 		}
 	
 
 	}
-	private void encryptMessage(BigInteger val) {
+	private void encryptMessage(BigInteger val, long e, long n) {
 		BigInteger C = new BigInteger("0");
 		BigInteger exp = new BigInteger(Long.toString(e));
 		BigInteger mod = new BigInteger(Long.toString(n));
 		C = val.modPow(exp, mod);
 		//System.out.println(C);
 		encryptValues.addElement(C);
-	
 	}
-	public Vector<BigInteger> getEncryptedMessage(){
+
+	private Vector<BigInteger> getEncryptedMessage(){
 		return encryptValues;
 	}
 /*==================================DECRYPT MESSAGE======================================*/		

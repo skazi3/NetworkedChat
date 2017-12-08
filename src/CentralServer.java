@@ -160,9 +160,10 @@ class CommunicationThread extends Thread
                  switch(messageType)
                  {
                  case 'A':
+                	 /*==================IMMEDIATELY ADD EXISTING CLIENTS TO NEW CLIENT===================================*/
 	                	 for(String key_name: clientInfo.keySet()) {
              			ClientInfo c = clientInfo.get(key_name);
-             			MessageObject update = new MessageObject('U', key_name);
+             			MessageObject update = new MessageObject('U', c.getPublicKey(), key_name);
              			out.writeObject(update);
              			out.flush();
 	             	 }
@@ -172,7 +173,7 @@ class CommunicationThread extends Thread
                      clientInfo.put(name, new ClientInfo(publicKey, name, out));
                      
                      centralServer.history.insert("User added: " + name + "\n", 0);
-  
+                     /*==================INFORM OTHER USERS THAT NEW CLIENT HAS BEEN ADDED=================================*/
                      for (String key_name: clientInfo.keySet())
                      {
                     	 	if(key_name != name) {
