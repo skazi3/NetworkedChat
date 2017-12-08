@@ -153,6 +153,7 @@ class CommunicationThread extends Thread
             ObjectInputStream in = new ObjectInputStream(clientSocket.getInputStream());
 
             MessageObject inputObject;
+            Vector<BigInteger> encryptedMessage;
 
             while ((inputObject = (MessageObject) in.readObject()) != null)
             {
@@ -162,11 +163,12 @@ class CommunicationThread extends Thread
                  {
                  case 'A':
                 	 /*==================IMMEDIATELY ADD EXISTING CLIENTS TO NEW CLIENT===================================*/
-	                	 for(String key_name: clientInfo.keySet()) {
+                     for(String key_name: clientInfo.keySet()) {
              			ClientInfo c = clientInfo.get(key_name);
              			MessageObject update = new MessageObject('U', c.getPublicKey(), key_name);
              			out.writeObject(update);
              			out.flush();
+             			out.reset();
 	             	 }
                      name = inputObject.getName();
                      
@@ -179,9 +181,10 @@ class CommunicationThread extends Thread
                      {
                     	 	if(key_name != name) {
                     	 		ClientInfo c = clientInfo.get(key_name);
-	                         System.out.println ("Sending Message"); 
-	                         c.getOut().writeObject (inputObject);
-	                         c.getOut().flush();
+                                 System.out.println ("Sending Message");
+                                 c.getOut().writeObject (inputObject);
+                                 c.getOut().flush();
+                                 c.getOut().reset();
                     	 	}
                      }
 
@@ -192,11 +195,12 @@ class CommunicationThread extends Thread
                     	 	name = inputObject.getName();
                     	 	clientInfo.remove(name);
                     	 	for(String key_name: clientInfo.keySet()) {
-                    	 		if(key_name != name) {
-	                  			ClientInfo c = clientInfo.get(key_name);
-	                  			MessageObject update = new MessageObject('D', name);
-	                  			c.getOut().writeObject(update);
-	                  			c.getOut().flush();
+                    	 		if(key_name != name)
+                    	 		{
+                                    ClientInfo c = clientInfo.get(key_name);
+                                    MessageObject update = new MessageObject('D', name);
+                                    c.getOut().writeObject(update);
+                                    c.getOut().flush();
                     	 		}
      	             	 }
                          
@@ -206,23 +210,25 @@ class CommunicationThread extends Thread
 
                      case 'M':
                          System.out.println("Received message!");
-                         Vector<BigInteger> encryptedMessage = (Vector<BigInteger>)in.readObject();
                          name = inputObject.getName();
+                         encryptedMessage = inputObject.getEncryptedValues();
+                         System.out.println("in server received");
+                         for(BigInteger b: encryptedMessage)
+                         {
+                             System.out.println(b);
+                         }
 
                          for (String key_name : clientInfo.keySet())
                          {
                         	 	ClientInfo c = clientInfo.get(key_name);
-                        	 	if(key_name != name) {
-	                             System.out.println ("Sending Message");
-	                           
-	                             c.getOut().writeObject (inputObject);
-	                             c.getOut().flush();
-	                             c.getOut().writeObject(encryptedMessage);
-	                             c.getOut().flush(); 
-	                             
+                        	 	if(key_name.equals(name))
+                        	 	{
+                                     System.out.println ("Sending Message");
+                                     c.getOut().writeObject (inputObject);
+                                     c.getOut().reset();
                         	 	}
                          }
-
+                         encryptedMessage.removeAllElements();
                          break;
                  }
             }

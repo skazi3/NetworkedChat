@@ -27,10 +27,11 @@ public class MessageObject implements Serializable
 	}
 
 	/*send encrypted values*/
-	public MessageObject(char t, String name, Vector<BigInteger> val) {
+	public MessageObject(char t, String name, Vector<BigInteger> val, String m) {
 		type = t;
 		this.name = name;
 		encryptedValues = val;
+		message = m;
 	}
 	
 	public Vector<BigInteger> getEncryptedValues() {

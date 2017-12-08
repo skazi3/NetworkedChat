@@ -71,7 +71,7 @@ public class Client extends JFrame implements ActionListener{
 		pField      = new JTextField("16189");
 		qField      = new JTextField("16381");
 		portInfo    = new JTextField("62648");
-		machineInfo = new JTextField("10.5.219.126");
+		machineInfo = new JTextField("192.168.56.1");
  
 		
 		/*ADD THE CLIENT LIST ON THE SIDE*/
@@ -202,22 +202,28 @@ public class Client extends JFrame implements ActionListener{
 	public void sendMessage() {
 		try {
 			Object[] selectedClients = clientList.getSelectedValuesList().toArray();
+			String toSend = message.getText();
+			System.out.println("Sending message: " + toSend);
+            chatHistory.insert("Me: "+ toSend + "\n", 0);
 			for(Object s: selectedClients) {
 				String user = (String)s;
 				Pair pubKey = nameAndKey.get(user);
 				System.out.println("publicKey =" + pubKey.getVal1() + ", " + pubKey.getVal2());
-				Vector<BigInteger> encryptedMessage = encryptDecrypt.encrypt(pubKey, message.getText());
-				MessageObject msg = new MessageObject('M', clientName);
-	            chatHistory.insert("Me: "+ message.getText() + "\n", 0);
-	            message.setText("");
+				Vector<BigInteger> encryptedMessage = encryptDecrypt.encrypt(pubKey, toSend);
+				System.out.println("in send message");
+                for(BigInteger b: encryptedMessage)
+                {
+                    System.out.println(b);
+                }
+				MessageObject msg = new MessageObject('M', user, encryptedMessage, toSend);
 	            objectOut.writeObject(msg);
-	            objectOut.flush();
-	            objectOut.writeObject(encryptedMessage);
-	            objectOut.flush();
+	            objectOut.reset();
+	            //objectOut.flush();
+//	            objectOut.writeObject(encryptedMessage);
+//	            objectOut.flush();
 				
 			}
-            
-            
+            message.setText("");
             
         } 
  
@@ -342,6 +348,7 @@ class ClientCommunicationThread extends Thread {
                 char messageType = inputObject.getType();
                 String name;
                 String message;
+                Vector<BigInteger> encryptedMessage;
                 switch(messageType) {
                     case 'A': 
                         name = inputObject.getName();
@@ -361,9 +368,15 @@ class ClientCommunicationThread extends Thread {
 
                     case 'M':
                         name = inputObject.getName();
-                        Vector<BigInteger> encryptedMessage = (Vector<BigInteger>)objectIn.readObject();
+                        encryptedMessage = inputObject.getEncryptedValues();
+                        //Vector<BigInteger> encryptedMessage = (Vector<BigInteger>)objectIn.readObject();
+                        System.out.println("In client read");
+                        for(BigInteger b: encryptedMessage)
+                        {
+                            System.out.println(b);
+                        }
                         String decryptedMessage = client.encryptDecrypt.decrypt(client.getPrivateKey(), encryptedMessage);
-                        client.chatHistory.insert("Message from user " + name + ": " + decryptedMessage + "\n", 0);
+                        client.chatHistory.insert("Decrypted message from user " + name + ": " + decryptedMessage + "\n", 0);
                         break;
                         
                     case 'U':
@@ -375,10 +388,10 @@ class ClientCommunicationThread extends Thread {
 
                 }
 			}
-			objectIn.close();
 		}
 		catch(IOException e){
 			System.err.println("Problem with Client Read");
+			e.printStackTrace();
 		}
 		catch(ClassNotFoundException eC)
         {

@@ -35,6 +35,15 @@ public class RSAEncryption {
 		}
 		return msg.toCharArray();
 	}
+
+	private void printEncryptValues()
+	{
+		System.out.println("in encrypt");
+		for(BigInteger M: encryptValues)
+		{
+			System.out.println(M);
+		}
+	}
 	private void blockMessage(long e, long n, char[] charMessage) 
 	{
 		encryptValues.removeAllElements();
@@ -64,8 +73,12 @@ public class RSAEncryption {
 	
 	public Vector<BigInteger> encrypt(Pair publicKey, String message)
 	{
+		encryptValues.removeAllElements();
+
 		char[] charMessage = explodeMessage(message);
+		printEncryptValues();
 		blockMessage(publicKey.getVal1(), publicKey.getVal2(), charMessage);
+		printEncryptValues();
 		return encryptValues; 
 		
 		
@@ -117,7 +130,17 @@ public class RSAEncryption {
 	
 	public String decrypt(Pair privateKey, Vector<BigInteger> encryptedValues)
 	{
+		System.out.println("Encrypted values in decrypt");
+		for(BigInteger b: encryptedValues)
+		{
+			System.out.println(b);
+		}
+		decryptValues.removeAllElements();
+		System.out.println("Before");
+		printDecryptValues();
 		setDecryptValues(encryptedValues, privateKey);
+		System.out.println("After");
+		printDecryptValues();
 		return decryptMessage();
 	}
 	
