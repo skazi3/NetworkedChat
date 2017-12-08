@@ -146,7 +146,7 @@ public class Client extends JFrame implements ActionListener{
 				clientName = name.getText( );
 				
 			}
-			if(!isPrime(p) || !isPrime(q)) {
+			if(!isPrime(p) || !isPrime(q) || p < 16411 || q < 16411) {
 				File file = new File("src/prime.txt");
 				BufferedReader reader = null;
 				try {
@@ -158,8 +158,9 @@ public class Client extends JFrame implements ActionListener{
 				        text = reader.readLine();
 				        q = Integer.parseInt(text);
 				        getKeys = new GenerateKeys(p, q);
+				        publicKey = getKeys.getPublicKey();
 				        privateKey = getKeys.getPrivateKey();
-
+	
 				        break;
 				        	
 				    }
