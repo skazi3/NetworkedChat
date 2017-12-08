@@ -5,6 +5,7 @@ import java.io.*;
 import java.math.BigInteger;
 import java.net.*;
 import java.util.HashMap;
+import java.util.Random;
 import java.util.Vector;
 
 import javax.swing.*;
@@ -134,8 +135,9 @@ public class Client extends JFrame implements ActionListener{
 					"Name:", name,
 			};
 			int result = JOptionPane.showConfirmDialog(null, message, "Enter Server info", JOptionPane.OK_CANCEL_OPTION);
-
+			
 			/*STORE USER INFO INTO VARIABLES*/
+			
 			if(result == JOptionPane.OK_OPTION) {
 				machineName = machineInfo.getText();
 				portNum = Integer.parseInt(portInfo.getText());
@@ -143,18 +145,39 @@ public class Client extends JFrame implements ActionListener{
 				q = Integer.parseInt(qField.getText());
 				clientName = name.getText( );
 				
-				getKeys = new GenerateKeys(p, q);
-		
-				publicKey = getKeys.getPublicKey();
-				privateKey = getKeys.getPrivateKey();
-				
-//				System.out.println("publicKey =" + publicKey.getVal1() + ", " + publicKey.getVal2());
-//				System.out.println("privateKey = " + privateKey.getVal1() + ", " + privateKey.getVal2());
+			}
+			if(!isPrime(p) || !isPrime(q)) {
+				File file = new File("src/prime.txt");
+				BufferedReader reader = null;
+				try {
+				    reader = new BufferedReader(new FileReader(file));
+				    String text = null;
 
+				    while ((text = reader.readLine()) != null) {
+				        p = Integer.parseInt(text);
+				        text = reader.readLine();
+				        q = Integer.parseInt(text);
+				        getKeys = new GenerateKeys(p, q);
+				        privateKey = getKeys.getPrivateKey();
+
+				        break;
+				        	
+				    }
+				}catch (FileNotFoundException e) {
+				    e.printStackTrace();
+				} catch (IOException e) {
+				    e.printStackTrace();
+				} finally {
+				    try { 
+				        if (reader != null) {
+				            reader.close();
+				        }
+				    } catch (IOException e) {
+				    }
+				}
 			}
-			else {
-				result = JOptionPane.showConfirmDialog(null, message, "Enter Server info", JOptionPane.OK_CANCEL_OPTION);
-			}
+			System.out.println(" new p : " + p);
+			System.out.println("new q: " + q);
 			/*ESTABLISH CONNECTION WITH SERVER*/
 			try {
 				clientSocket = new Socket(machineName, portNum);
@@ -166,6 +189,15 @@ public class Client extends JFrame implements ActionListener{
 				sendButton.setEnabled(true);
 		        
 				new ClientCommunicationThread(objectIn, this, objectOut);
+				for(String key_name: nameAndKey.keySet()) {
+					if(clientName == key_name) {
+						objectOut.close();
+			            objectIn.close();
+			            clientSocket.close();
+			            setEnabled(false);
+			            connected = false;
+					}
+				}
 
 			}
 			catch(IllegalArgumentException iae) {
@@ -258,6 +290,8 @@ public class Client extends JFrame implements ActionListener{
 		
 		JMenuItem startConnection = new JMenuItem("Start Connection");
 		JMenuItem quitChat = new JMenuItem("Quit");
+		JMenuItem aboutAuthors = new JMenuItem("about us");
+		JMenuItem helpBox = new JMenuItem("How To Use");
 		
 		startConnection.addActionListener(this);
 		quitChat.addActionListener(new ActionListener() {
@@ -281,11 +315,34 @@ public class Client extends JFrame implements ActionListener{
 				
 			}
 		});
+		aboutAuthors.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				JOptionPane.showMessageDialog(null,
+		    		    "Name: Sarah Kazi\nNetid: skazi3\nName:Zakee Jabbar\nNetid: zjabba2"
+		    		    + "We're just a couple of programmers and we hope you go easy on grading us!\nThank you :)\n ",
+		    		    "About the Authors",
+		    		    JOptionPane.PLAIN_MESSAGE);
+			}
+		});
+		helpBox.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				JOptionPane.showMessageDialog(null,
+		    		    "Launch a ChatServer.java class to start off the server. Press start Listening"
+		    		    + "And then launch a ChatClient.java to start a client. You can launch multiple "
+		    		    + "ChatClient classes, each one as a client. To connect press Connect and enter"
+		    		    + "the port name, IP address, and two prime integers and a unique name. Pressing"
+		    		    + "quit will exit the user from the chat.\n",
+		    		    "How To Use",
+		    		    JOptionPane.PLAIN_MESSAGE);
+			}
+		});
+		
 	
 		
 		connect.add(startConnection);
 		quit.add(quitChat);
-		
+		about.add(aboutAuthors);
+		help.add(helpBox);
 		
 		menuBar.add(about);
 		menuBar.add(help);
