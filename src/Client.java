@@ -6,6 +6,7 @@ import java.math.BigInteger;
 import java.net.*;
 import java.util.HashMap;
 import java.util.Random;
+import java.util.Scanner;
 import java.util.Vector;
 
 import javax.swing.*;
@@ -147,32 +148,23 @@ public class Client extends JFrame implements ActionListener{
 				
 			}
 			if(!isPrime(p) || !isPrime(q) || p < 16411 || q < 16411) {
-				File file = new File("src/prime.txt");
-				BufferedReader reader = null;
-				try {
-				    reader = new BufferedReader(new FileReader(file));
-				    String text = null;
 
-				    while ((text = reader.readLine()) != null) {
-				        p = Integer.parseInt(text);
-				        text = reader.readLine();
-				        q = Integer.parseInt(text);
-				        
-				        
-				        break;
-				        	
-				    }
-				}catch (FileNotFoundException e) {
+				try {
+                    Scanner scanner = new Scanner(new File("src/prime.txt"));
+                    int[] primeValues = new int[24];
+
+                    int i = 0;
+                    while(scanner.hasNextInt()){
+                        primeValues[i++] = scanner.nextInt();
+                    }
+                    int index1 = (int)(Math.random() * 23);
+				    int index2 =  (int)(Math.random() * 23);
+				    p = primeValues[index1];
+				    q = primeValues[index2];
+				}
+				catch (FileNotFoundException e)
+                {
 				    e.printStackTrace();
-				} catch (IOException e) {
-				    e.printStackTrace();
-				} finally {
-				    try { 
-				        if (reader != null) {
-				            reader.close();
-				        }
-				    } catch (IOException e) {
-				    }
 				}
 			}
 			getKeys = new GenerateKeys(p, q);
@@ -249,7 +241,7 @@ public class Client extends JFrame implements ActionListener{
                 {
                     System.out.println(b);
                 }
-				MessageObject msg = new MessageObject('M', user, encryptedMessage, toSend);
+				MessageObject msg = new MessageObject('M', user, encryptedMessage, clientName);
 	            objectOut.writeObject(msg);
 	            objectOut.reset();
 	            //objectOut.flush();
@@ -400,6 +392,7 @@ class ClientCommunicationThread extends Thread {
 
             objectOut.writeObject(initMessage);
             objectOut.flush();
+            objectOut.reset();
 			MessageObject inputObject;
 
 			while((inputObject = (MessageObject) objectIn.readObject()) != null)
@@ -417,7 +410,12 @@ class ClientCommunicationThread extends Thread {
                         client.names.addElement(name);
 
                         break;
-
+                    case 'Q':
+                        objectOut.close();
+                        objectIn.close();
+                        client.clientSocket.close();
+                        System.out.println("Sorry, identical name. Connection closing");
+                        break;
                     case 'D':
                         name = inputObject.getName();
                         client.chatHistory.insert("User Deleted: " + name + "\n", 0);
@@ -435,7 +433,7 @@ class ClientCommunicationThread extends Thread {
                             System.out.println(b);
                         }
                         String decryptedMessage = client.encryptDecrypt.decrypt(client.getPrivateKey(), encryptedMessage);
-                        client.chatHistory.insert("Decrypted message from user " + name + ": " + decryptedMessage + "\n", 0);
+                        client.chatHistory.insert("Decrypted message from user " + inputObject.getMyName() + ": " + decryptedMessage + "\n", 0);
                         break;
                         
                     case 'U':

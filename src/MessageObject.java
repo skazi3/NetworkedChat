@@ -11,6 +11,7 @@ public class MessageObject implements Serializable
 	private Pair publicKey;
 	private String message;
 	private String name;
+	private String myName;
 	private Vector<BigInteger> encryptedValues;
 	
 	
@@ -20,6 +21,9 @@ public class MessageObject implements Serializable
 		publicKey = pk;
 		this.name = n;
 	}
+	public MessageObject(char t){
+		type = t;
+	}
 	//remove 
 	public MessageObject(char t, Pair pk) {
 		type = t;
@@ -27,11 +31,11 @@ public class MessageObject implements Serializable
 	}
 
 	/*send encrypted values*/
-	public MessageObject(char t, String name, Vector<BigInteger> val, String m) {
+	public MessageObject(char t, String name, Vector<BigInteger> val, String mN) {
 		type = t;
 		this.name = name;
 		encryptedValues = val;
-		message = m;
+		myName = mN;
 	}
 	
 	public Vector<BigInteger> getEncryptedValues() {
@@ -81,5 +85,7 @@ public class MessageObject implements Serializable
 		this.name = name;
 	}
 
-
+	public String getMyName() {
+		return myName;
+	}
 }

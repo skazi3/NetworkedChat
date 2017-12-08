@@ -162,33 +162,42 @@ class CommunicationThread extends Thread
                  switch(messageType)
                  {
                  case 'A':
-                	 /*==================IMMEDIATELY ADD EXISTING CLIENTS TO NEW CLIENT===================================*/
-                     for(String key_name: clientInfo.keySet()) {
-             			ClientInfo c = clientInfo.get(key_name);
-             			MessageObject update = new MessageObject('U', c.getPublicKey(), key_name);
-             			out.writeObject(update);
-             			out.flush();
-             			out.reset();
-	             	 }
-                     name = inputObject.getName();
-                     
-                     Pair publicKey = inputObject.getPublicKey();
-                     clientInfo.put(name, new ClientInfo(publicKey, name, out));
-                     
-                     centralServer.history.insert("User added: " + name + "\n", 0);
-                     /*==================INFORM OTHER USERS THAT NEW CLIENT HAS BEEN ADDED=================================*/
-                     for (String key_name: clientInfo.keySet())
+                     if(clientInfo.containsKey(inputObject.getName()))
                      {
-                    	 	if(key_name != name) {
-                    	 		ClientInfo c = clientInfo.get(key_name);
-                                 System.out.println ("Sending Message");
-                                 c.getOut().writeObject (inputObject);
+                         MessageObject quit = new MessageObject('Q');
+                         out.writeObject(quit);
+                         out.flush();
+                         out.reset();
+                     }
+                     else
+                     {
+                	 /*==================IMMEDIATELY ADD EXISTING CLIENTS TO NEW CLIENT===================================*/
+                         for (String key_name : clientInfo.keySet()) {
+                             ClientInfo c = clientInfo.get(key_name);
+                             MessageObject update = new MessageObject('U', c.getPublicKey(), key_name);
+                             out.writeObject(update);
+                             out.flush();
+                             out.reset();
+                         }
+
+                         name = inputObject.getName();
+
+                         Pair publicKey = inputObject.getPublicKey();
+                         clientInfo.put(name, new ClientInfo(publicKey, name, out));
+
+                         centralServer.history.insert("User added: " + name + "\n", 0);
+                     /*==================INFORM OTHER USERS THAT NEW CLIENT HAS BEEN ADDED=================================*/
+                         for (String key_name : clientInfo.keySet()) {
+                             if (key_name != name) {
+                                 ClientInfo c = clientInfo.get(key_name);
+                                 System.out.println("Sending Message");
+                                 c.getOut().writeObject(inputObject);
                                  c.getOut().flush();
                                  c.getOut().reset();
-                    	 	}
+                             }
+                         }
                      }
-
-                         break;
+                        break;
 
 
                      case 'D':
