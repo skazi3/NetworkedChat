@@ -48,7 +48,7 @@ public class Client extends JFrame implements ActionListener{
 	
 	ObjectOutputStream objectOut = null;
     ObjectInputStream objectIn = null;
-    RSAEncryption encryptionVal;
+    GenerateKeys getKeys;
 	
 	  
 	JTextArea  chatHistory;
@@ -139,11 +139,10 @@ public class Client extends JFrame implements ActionListener{
 				q = Integer.parseInt(qField.getText());
 				clientName = name.getText( );
 				
-				encryptionVal = new RSAEncryption(p, q);
-				encryptionVal.setMessage("aaaa aaa aaa");
-				
-				publicKey = encryptionVal.getPublicKey();
-				privateKey = encryptionVal.getPrivateKey();
+				getKeys = new GenerateKeys(p, q);
+
+				publicKey = getKeys.getPublicKey();
+				privateKey = getKeys.getPrivateKey();
 
 			}
 			else {
