@@ -1,7 +1,8 @@
 import java.net.*;
 import java.util.HashMap;
 import java.util.Vector;
-import java.io.*; 
+import java.io.*;
+import java.math.BigInteger;
 import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
@@ -205,7 +206,7 @@ class CommunicationThread extends Thread
 
                      case 'M':
                          System.out.println("Received message!");
-                         String message = inputObject.getMessage();
+                         Vector<BigInteger> encryptedMessage = (Vector<BigInteger>)in.readObject();
                          name = inputObject.getName();
 
                          for (String key_name : clientInfo.keySet())
@@ -215,7 +216,10 @@ class CommunicationThread extends Thread
 	                             System.out.println ("Sending Message");
 	                           
 	                             c.getOut().writeObject (inputObject);
+	                             c.getOut().flush();
+	                             c.getOut().writeObject(encryptedMessage);
 	                             c.getOut().flush(); 
+	                             
                         	 	}
                          }
 

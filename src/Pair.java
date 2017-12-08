@@ -1,8 +1,11 @@
+import java.io.Serializable;
 
-public class Pair {
+public class Pair implements Serializable
+{
 	private long val1;
 	private long val2;
-	public Pair(long x, long y) {
+	public Pair(long x, long y) 
+	{
 		val1 = x;
 		val2 = y;
 	}

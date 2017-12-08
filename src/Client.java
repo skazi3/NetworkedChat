@@ -2,8 +2,10 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.*;
+import java.math.BigInteger;
 import java.net.*;
 import java.util.HashMap;
+import java.util.Vector;
 
 import javax.swing.*;
 /*
@@ -49,6 +51,7 @@ public class Client extends JFrame implements ActionListener{
 	ObjectOutputStream objectOut = null;
     ObjectInputStream objectIn = null;
     GenerateKeys getKeys;
+    RSAEncryption encryptDecrypt;
 	
 	  
 	JTextArea  chatHistory;
@@ -67,7 +70,7 @@ public class Client extends JFrame implements ActionListener{
 		name        = new JTextField("sarah");
 		pField      = new JTextField("16189");
 		qField      = new JTextField("16381");
-		portInfo    = new JTextField("62197");
+		portInfo    = new JTextField("62648");
 		machineInfo = new JTextField("10.5.219.126");
  
 		
@@ -84,6 +87,7 @@ public class Client extends JFrame implements ActionListener{
 		sendButton.setEnabled(false);
 		sendButton.addActionListener(this);
 		
+		encryptDecrypt = new RSAEncryption();
 		nameAndKey = new HashMap<String, Pair>();
 
 		
@@ -140,9 +144,12 @@ public class Client extends JFrame implements ActionListener{
 				clientName = name.getText( );
 				
 				getKeys = new GenerateKeys(p, q);
-
+		
 				publicKey = getKeys.getPublicKey();
 				privateKey = getKeys.getPrivateKey();
+				
+//				System.out.println("publicKey =" + publicKey.getVal1() + ", " + publicKey.getVal2());
+//				System.out.println("privateKey = " + privateKey.getVal1() + ", " + privateKey.getVal2());
 
 			}
 			else {
@@ -194,11 +201,24 @@ public class Client extends JFrame implements ActionListener{
 /*===================================SEND MESSAGE TO SERVER==========================*/
 	public void sendMessage() {
 		try {
-            MessageObject msg = new MessageObject('M', clientName, message.getText());
-            chatHistory.insert("Me: "+ message.getText() + "\n", 0);
-            message.setText("");
-            objectOut.writeObject(msg);
-            objectOut.flush();
+			Object[] selectedClients = clientList.getSelectedValuesList().toArray();
+			for(Object s: selectedClients) {
+				String user = (String)s;
+				Pair pubKey = nameAndKey.get(user);
+				System.out.println("publicKey =" + pubKey.getVal1() + ", " + pubKey.getVal2());
+				Vector<BigInteger> encryptedMessage = encryptDecrypt.encrypt(pubKey, message.getText());
+				MessageObject msg = new MessageObject('M', clientName);
+	            chatHistory.insert("Me: "+ message.getText() + "\n", 0);
+	            message.setText("");
+	            objectOut.writeObject(msg);
+	            objectOut.flush();
+	            objectOut.writeObject(encryptedMessage);
+	            objectOut.flush();
+				
+			}
+            
+            
+            
         } 
  
 		catch(Exception e) {
@@ -276,6 +296,14 @@ public class Client extends JFrame implements ActionListener{
 		return menuBar;
 	}
 	
+	public Pair getPrivateKey() {
+		return privateKey;
+	}
+
+	public void setPrivateKey(Pair privateKey) {
+		this.privateKey = privateKey;
+	}
+
 	private boolean isPrime(int num) {
 		for (int i=2; i<num; i++) {
 		    if (num % i == 0 && i != num) 
@@ -301,7 +329,7 @@ class ClientCommunicationThread extends Thread {
 	}
 	public void run() {
 		System.out.println("New Client Communication Thread");
-        MessageObject initMessage = new MessageObject('A', client.getClientName(), "Added");
+        MessageObject initMessage = new MessageObject('A', client.getPublicKey(), client.getClientName());
 		
 		try {
 
@@ -333,8 +361,9 @@ class ClientCommunicationThread extends Thread {
 
                     case 'M':
                         name = inputObject.getName();
-                        message = inputObject.getMessage();
-                        client.chatHistory.insert("Message from user " + name + ": " + message + "\n", 0);
+                        Vector<BigInteger> encryptedMessage = (Vector<BigInteger>)objectIn.readObject();
+                        String decryptedMessage = client.encryptDecrypt.decrypt(client.getPrivateKey(), encryptedMessage);
+                        client.chatHistory.insert("Message from user " + name + ": " + decryptedMessage + "\n", 0);
                         break;
                         
                     case 'U':

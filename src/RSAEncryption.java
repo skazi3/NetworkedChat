@@ -6,114 +6,39 @@ import java.math.*;
 import java.util.Random;
 import java.util.Vector;
 
-public class RSAEncryption {
-	private int p;
-	private int q;
-	private int n;
-	
-	private long phi;
-	private long e;
-	private long d;
-	
+public class RSAEncryption {	
 	private Pair publicKey;
 	private Pair privateKey;
 	
 	private static int blockSize = 4;
 	private BigInteger num = new BigInteger("128");
 	
-	private String message;
-	private char[] charMessage;
-	
-	private Vector<BigInteger> blockValues;
 	private Vector<BigInteger> encryptValues;
 	private Vector<BigInteger> decryptValues;
 	
-	public RSAEncryption(int pVal, int qVal) {
+	public RSAEncryption() {
 		
-		blockValues = new Vector<BigInteger>();
 		encryptValues = new Vector<BigInteger>();
 		decryptValues = new Vector<BigInteger>();
-		
-		p   = pVal;
-		q   = qVal;
-		n   = p * q;
-		phi = createPhi();
-		
-		e   = createE();
-		d   = createD();
-
-		
-
-		publicKey  = new Pair(e, n);
-		privateKey = new Pair(d, n);
-	}
-/*============================GET PUBLIC AND PRIVATE KEY========================================*/
-	public Pair getPublicKey() {
-		return new Pair(e, n);
-	}
-	public Pair getPrivateKey() {
-		return new Pair(d, n);
-	}
-	
-	/*CREATE PHI VAL*/ 
-	private int createPhi() {
-		 return (p-1) * (q-1);
-	}
-/*===============================CREATE D AND E================================================*/
-	private long createE() {
-		long i = 2;
-		long count = 0;
-		Random rand = new Random();
-		int x = rand.nextInt(100) + 100;
-		while (i < n){
-	        if (gcd(i, phi)==1) {
-	            count++;
-	            if(count == x) {
-	            		break;
-	            }
-	            else
-	            		i++;
-	        }
-	        else
-	           i++;
-		 }
-		 return i;
-	}
-	private long createD() {
-		long k = 2;
-		long dVal;
-		
-		while((1 + (k*phi)) % e != 0) {
-			k++;
-		}
-		dVal = (1 + (k*phi)) / e;
-		return dVal;
-		
 
 	}
+
 /*============================GRAB MESSAGE AND ENCRYPT IT===================================*/	
-	public void setMessage(String m) {
-		message = m;
-		charMessage = explodeMessage();
-	}
-	public Vector<BigInteger> getEncryptValues(long e, long n) {
-		blockMessage(e, n);
-		return encryptValues;
-		
-		
-	}
-	private char[] explodeMessage() {
-		int addAmount = message.length() % blockSize;
+	
+	private char[] explodeMessage(String msg) 
+	{
+		int addAmount = msg.length() % blockSize;
 		if(addAmount != 0) {
 			for(int i = 0; i < blockSize - addAmount; i++) {
-				message = message + 0;
+				msg = msg + 0;
 			}
 		}
-		return message.toCharArray();
+		return msg.toCharArray();
 	}
-	private void blockMessage(long e, long n) {
+	private void blockMessage(long e, long n, char[] charMessage) 
+	{
+		encryptValues.removeAllElements();
 
-		char[] block = new char[blockSize];
 		for(int i = 0; i < charMessage.length; i+=blockSize) {
 			BigInteger val = new BigInteger("0");
 			for(int j = i; j < i + blockSize; j++) {
@@ -136,15 +61,23 @@ public class RSAEncryption {
 		encryptValues.addElement(C);
 	}
 
-	private Vector<BigInteger> getEncryptedMessage(){
-		return encryptValues;
+	
+	public Vector<BigInteger> encrypt(Pair publicKey, String message)
+	{
+		char[] charMessage = explodeMessage(message);
+		blockMessage(publicKey.getVal1(), publicKey.getVal2(), charMessage);
+		return encryptValues; 
+		
+		
 	}
 /*==================================DECRYPT MESSAGE======================================*/		
-	private void setDecryptValues() {
+	private void setDecryptValues(Vector<BigInteger> encryptedValues, Pair privateKey) 
+	{
+		decryptValues.removeAllElements();
 		BigInteger M = new BigInteger("0");
 		
-		for(BigInteger C: encryptValues) {
-			M = C.modPow(new BigInteger(Long.toString(d)), new BigInteger(Integer.toString(n)));
+		for(BigInteger C: encryptedValues) {
+			M = C.modPow(new BigInteger(Long.toString(privateKey.getVal1())), new BigInteger(Long.toString(privateKey.getVal2())));
 			decryptValues.addElement(M);
 		}
 		decryptMessage();
@@ -173,24 +106,22 @@ public class RSAEncryption {
 		
 	}
 	
-	private void printDecryptValues() {
+	private void printDecryptValues() 
+	{
 		System.out.println("in decrypt");
-		for(BigInteger M: decryptValues) {
+		for(BigInteger M: decryptValues) 
+		{
 			System.out.println(M);
 		}
 	}
 	
-/*============================CHECK IF VAL IS COPRIME======================================*/
-	
-	private static long gcd(long val1, long val2) {
-	    long t;
-	    while(val2 != 0){
-	        t = val1;
-	        val1 = val2;
-	        val2 = t % val2;
-	    }
-	    return val1;
+	public String decrypt(Pair privateKey, Vector<BigInteger> encryptedValues)
+	{
+		setDecryptValues(encryptedValues, privateKey);
+		return decryptMessage();
 	}
+	
+
 
 	
 	
