@@ -157,10 +157,8 @@ public class Client extends JFrame implements ActionListener{
 				        p = Integer.parseInt(text);
 				        text = reader.readLine();
 				        q = Integer.parseInt(text);
-				        getKeys = new GenerateKeys(p, q);
-				        publicKey = getKeys.getPublicKey();
-				        privateKey = getKeys.getPrivateKey();
-	
+				        
+				        
 				        break;
 				        	
 				    }
@@ -177,6 +175,9 @@ public class Client extends JFrame implements ActionListener{
 				    }
 				}
 			}
+			getKeys = new GenerateKeys(p, q);
+	        publicKey = getKeys.getPublicKey();
+	        privateKey = getKeys.getPrivateKey();
 			System.out.println(" new p : " + p);
 			System.out.println("new q: " + q);
 			/*ESTABLISH CONNECTION WITH SERVER*/
