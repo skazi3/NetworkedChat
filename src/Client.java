@@ -16,6 +16,14 @@ public class Client extends JFrame implements ActionListener{
 	
 /*======================PRIVATE VARIABLES AND SOCKET VARIABLES====================*/	
 	private JPanel    clientsInfo;
+	public Pair getPublicKey() {
+		return publicKey;
+	}
+
+	public void setPublicKey(Pair publicKey) {
+		this.publicKey = publicKey;
+	}
+
 	private JTextField machineInfo;
 	private JTextField portInfo;
 	
@@ -37,10 +45,10 @@ public class Client extends JFrame implements ActionListener{
 	boolean connected;
 	
 	Socket clientSocket;
-	PrintWriter out;
-	BufferedReader in;
+	
 	ObjectOutputStream objectOut = null;
     ObjectInputStream objectIn = null;
+    RSAEncryption encryptionVal;
 	
 	  
 	JTextArea  chatHistory;
@@ -131,16 +139,11 @@ public class Client extends JFrame implements ActionListener{
 				q = Integer.parseInt(qField.getText());
 				clientName = name.getText( );
 				
-				RSAEncryption encryptionVal = new RSAEncryption(p, q);
+				encryptionVal = new RSAEncryption(p, q);
 				encryptionVal.setMessage("aaaa aaa aaa");
 				
 				publicKey = encryptionVal.getPublicKey();
 				privateKey = encryptionVal.getPrivateKey();
-				
-
-                //initMessage = new MessageObject('A', encrypt.getPublicKey(), name.getText());
-
-				//add = new MessageObject('A', encrypt.getPublicKey(), name.getText());
 
 			}
 			else {
@@ -174,8 +177,8 @@ public class Client extends JFrame implements ActionListener{
 /*============================CLOSE CONNECTION=======================================*/
 			try 
 	        {
-	          out.close();
-	          in.close();
+	          objectOut.close();
+	          objectIn.close();
 	          clientSocket.close();
 	          sendButton.setEnabled(false);
 	          connected = false;
@@ -197,8 +200,8 @@ public class Client extends JFrame implements ActionListener{
             message.setText("");
             objectOut.writeObject(msg);
             objectOut.flush();
-        }
-
+        } 
+ 
 		catch(Exception e) {
 			chatHistory.insert("Error processing message", 0);
 			e.printStackTrace();
@@ -245,6 +248,11 @@ public class Client extends JFrame implements ActionListener{
 		            		MessageObject delete = new MessageObject('D', clientName);
 		            		objectOut.writeObject(delete);
 						objectOut.flush();
+						
+						objectOut.close();
+						objectIn.close();
+						clientSocket.close();
+						
 					} catch (IOException e1) {
 						// TODO Auto-generated catch block
 						e1.printStackTrace();
@@ -308,9 +316,10 @@ class ClientCommunicationThread extends Thread {
                 String name;
                 String message;
                 switch(messageType) {
-                    case 'A':
+                    case 'A': 
                         name = inputObject.getName();
-                        Pair publickey = inputObject.getPublicKey();
+                        client.nameAndKey.put(name, inputObject.getPublicKey());
+                        
                         client.chatHistory.insert("User added: " + name + "\n", 0);
                         client.names.addElement(name);
 
@@ -331,13 +340,14 @@ class ClientCommunicationThread extends Thread {
                         
                     case 'U':
                     		name = inputObject.getName();
+                    		client.nameAndKey.put(name, inputObject.getPublicKey());
                     		client.names.addElement(name);
                     		break;
                     		
 
                 }
 			}
-			in.close();
+			objectIn.close();
 		}
 		catch(IOException e){
 			System.err.println("Problem with Client Read");
